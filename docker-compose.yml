@@ -1,0 +1,51 @@
+networks:
+  front:
+    ipam:
+      config:
+        - subnet: 10.0.0.0/16
+  back:
+    ipam:
+      config:
+        - subnet: 10.10.0.0/16
+
+volumes:
+  socket:
+    driver: local
+  log:
+    driver: local
+  docroot:
+    driver: local
+
+services:
+  app:
+    container_name: minimal_sns_app
+    build: ./app
+    volumes:
+      - ./app:/app
+    ports:
+      - "1323:1323"
+    networks:
+      - front
+      - back
+    environment:
+      TZ: "Asia/Tokyo"
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_DSN: "root:@tcp(db:3306)/app?charset=utf8mb4&parseTime=True&loc=Local"
+    depends_on:
+      - db
+    restart: on-failure
+
+  db:
+    image: mysql:8.0
+    container_name: db
+    hostname: db
+    networks:
+      - back
+    volumes:
+      - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/0_init.sql:/docker-entrypoint-initdb.d/0_init.sql
+      - ./mysql/test.sql:/docker-entrypoint-initdb.d/test.sql
+    environment:
+      MYSQL_ALLOW_EMPTY_PASSWORD: yes
+      MYSQL_DATABASE: app
+      TZ: "Asia/Tokyo"
