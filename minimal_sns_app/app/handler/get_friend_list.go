@@ -16,8 +16,8 @@ func GetFriendList(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
 	id, err := strconv.Atoi(idStr)
-	if err != nil || id <= 0 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
+	if err != nil || id <= 0 || len(idStr) > 11 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be 0 ~ 99999999999"})
 	}
 	exist, err := userExists(id)
 	if err != nil {
