@@ -41,7 +41,6 @@ func getFriendOfFriendByIDWithFilter(id string) ([]model.Friend, error) {
 		SELECT CASE 
 				 WHEN user1_id = ? THEN user2_id
 				 WHEN user2_id = ? THEN user1_id
-				 ELSE NULL 
 			   END AS friend_id
 		FROM friend_link
 		WHERE user1_id = ? OR user2_id = ?

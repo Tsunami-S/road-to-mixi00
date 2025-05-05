@@ -27,6 +27,10 @@ type BlockList struct {
 	User2ID string `gorm:"not null" json:"user2_id"`
 }
 
+func (BlockList) TableName() string {
+	return "block_list"
+}
+
 type FriendRequest struct {
 	ID      uint   `gorm:"primaryKey" json:"id"`
 	User1ID string `gorm:"type:varchar(20);not null" json:"user1_id"`

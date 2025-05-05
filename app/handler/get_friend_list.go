@@ -35,12 +35,12 @@ func GetFriendList(c echo.Context) error {
 func getFriendsByID(id string) ([]model.Friend, error) {
 	var friends []model.Friend
 	query := `
-        SELECT DISTINCT u.user_id AS id, u.name
+        SELECT u.user_id AS id, u.name
         FROM friend_link f
         JOIN users u ON u.user_id = f.user2_id
         WHERE f.user1_id = ?
         UNION
-        SELECT DISTINCT u.user_id , u.name
+        SELECT u.user_id , u.name
         FROM friend_link f
         JOIN users u ON u.user_id = f.user1_id
         WHERE f.user2_id = ?;

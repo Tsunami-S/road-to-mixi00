@@ -11,6 +11,7 @@ func AddNewUser(c echo.Context) error {
 	id := c.QueryParam("id")
 	name := c.QueryParam("name")
 
+	// validation
 	if len(id) == 0 || len(id) > 20 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be 1 ~ 20 characters"})
 	}
@@ -18,6 +19,7 @@ func AddNewUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name must be 1 ~ 64 characters"})
 	}
 
+	// add new user
 	user := model.User{UserID: id, Name: name}
 	if err := db.DB.Create(&user).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to create user"})

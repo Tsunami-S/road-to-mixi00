@@ -12,6 +12,7 @@ func RespondFriendRequest(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 	action := c.QueryParam("action")
 
+	// validation
 	if user1ID == "" || user2ID == "" || user1ID == user2ID {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
 	}
@@ -19,16 +20,19 @@ func RespondFriendRequest(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid action"})
 	}
 
+	// check REQUEST status
 	var req model.FriendRequest
 	err := db.DB.Where("user1_id = ? AND user2_id = ? AND status = 'pending'", user1ID, user2ID).First(&req).Error
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "request not found or already handled"})
 	}
 
+	// update status
 	if err := db.DB.Model(&req).Update("status", action).Error; err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to update request"})
 	}
 
+	// add friend
 	if action == "accepted" {
 		link := model.FriendLink{User1ID: user1ID, User2ID: user2ID}
 		if err := db.DB.Create(&link).Error; err != nil {
