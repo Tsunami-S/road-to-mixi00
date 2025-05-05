@@ -12,10 +12,10 @@ func AddNewUser(c echo.Context) error {
 	name := c.QueryParam("name")
 
 	// validation
-	if len(id) == 0 || len(id) > 20 {
+	if id == "" || len(id) > 20 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be 1 ~ 20 characters"})
 	}
-	if len(name) == 0 || len(name) > 64 {
+	if name == "" || len(name) > 64 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name must be 1 ~ 64 characters"})
 	}
 

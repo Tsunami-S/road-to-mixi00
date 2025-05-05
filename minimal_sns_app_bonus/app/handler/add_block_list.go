@@ -12,7 +12,7 @@ func AddBlockList(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 
 	// validation
-	if len(user1ID) == 0 || len(user2ID) == 0 || len(user1ID) > 20 || len(user2ID) > 20 {
+	if user1ID == "" || user2ID == "" || len(user1ID) > 20 || len(user2ID) > 20 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
 	}
 	if user1ID == user2ID {

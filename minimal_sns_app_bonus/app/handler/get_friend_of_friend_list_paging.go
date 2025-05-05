@@ -7,12 +7,13 @@ import (
 	"net/http"
 )
 
-func GetFriendOfFriendList(c echo.Context) error {
-	id, err := parseAndValidateID(c)
-	if err != nil {
-		return err
-	}
+func GetFriendOfFriendListPaging(c echo.Context) error {
+	id := c.QueryParam("id")
 
+	// validation
+	if id == "" || len(id) > 20 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be 1 ~ 20 characters"})
+	}
 	exist, err := userExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
@@ -20,8 +21,14 @@ func GetFriendOfFriendList(c echo.Context) error {
 	if !exist {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
 	}
+	limit, page, err := parseAndValidatePagination(c)
+	if err != nil {
+		return err
+	}
 
-	result, err := getFriendOfFriendByIDWithFilter(id)
+	// get friend list with paging
+	offset := (page - 1) * limit
+	result, err := getFriendOfFriendByIDWithPaging(id, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -32,7 +39,7 @@ func GetFriendOfFriendList(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func getFriendOfFriendByIDWithFilter(id string) ([]model.Friend, error) {
+func getFriendOfFriendByIDWithPaging(id string, limit, offset int) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `
@@ -63,14 +70,16 @@ func getFriendOfFriendByIDWithFilter(id string) ([]model.Friend, error) {
 		  UNION
 		  SELECT user1_id FROM block_list WHERE user2_id = ?
 	  )
-    `
+	LIMIT ? OFFSET ?
+	`
 
 	err := db.DB.Raw(query,
-		id, id, // CASE: user1_id = ? || user2_id = ?
-		id, id, // WHERE: user1_id = ? OR user2_id = ?
-		id,         // WHERE u.user_id != ?
-		id, id, id, // NOT IN: friend_link
-		id, id, // NOT IN: block_list
+		id, id, id, id, // direct
+		id,         // u.user_id != ?
+		id, id, id, // not already friend
+		id, id, // block list
+		limit, offset,
 	).Scan(&result).Error
+
 	return result, err
 }

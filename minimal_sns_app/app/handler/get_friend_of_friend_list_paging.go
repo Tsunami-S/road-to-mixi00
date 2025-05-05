@@ -5,14 +5,20 @@ import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 	"net/http"
+	"strconv"
 )
 
 func GetFriendOfFriendListPaging(c echo.Context) error {
-	id, err := parseAndValidateID(c)
-	if err != nil {
-		return err
-	}
+	idStr := c.QueryParam("id")
 
+	// validation
+	if idStr == "" {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
+	}
+	id, err := strconv.Atoi(idStr)
+	if err != nil || id <= 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
+	}
 	exist, err := userExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
@@ -20,12 +26,12 @@ func GetFriendOfFriendListPaging(c echo.Context) error {
 	if !exist {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
 	}
-
 	limit, page, err := parseAndValidatePagination(c)
 	if err != nil {
 		return err
 	}
 
+	// get friend list with paging
 	offset := (page - 1) * limit
 	result, err := getFriendOfFriendByIDWithPaging(id, limit, offset)
 	if err != nil {
@@ -38,7 +44,7 @@ func GetFriendOfFriendListPaging(c echo.Context) error {
 	return c.JSON(http.StatusOK, result)
 }
 
-func getFriendOfFriendByIDWithPaging(id string, limit, offset int) ([]model.Friend, error) {
+func getFriendOfFriendByIDWithPaging(id, limit, offset int) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `
