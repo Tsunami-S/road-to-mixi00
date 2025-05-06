@@ -9,7 +9,7 @@ import (
 	"strconv"
 )
 
-func isValidUserId(id string) (bool, error) {
+func IsValidUserId(id string) (bool, error) {
 	if id == "" || len(id) > 20 {
 		return false, errors.New("invalid user ID format")
 	}
@@ -26,7 +26,7 @@ func isValidUserId(id string) (bool, error) {
 	return true, nil
 }
 
-func userExists(id string) (bool, error) {
+func UserExists(id string) (bool, error) {
 	var user model.User
 	err := db.DB.Where("user_id = ?", id).First(&user).Error
 	if err != nil {
@@ -38,7 +38,7 @@ func userExists(id string) (bool, error) {
 	return true, nil
 }
 
-func parseAndValidatePagination(c echo.Context) (limit int, page int, err error) {
+func ParseAndValidatePagination(c echo.Context) (limit int, page int, err error) {
 	limitStr := c.QueryParam("limit")
 	pageStr := c.QueryParam("page")
 

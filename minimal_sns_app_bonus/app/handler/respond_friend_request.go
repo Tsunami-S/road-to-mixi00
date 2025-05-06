@@ -13,10 +13,10 @@ func RespondFriendRequest(c echo.Context) error {
 	action := c.QueryParam("action")
 
 	// validation
-	if valid, err := isValidUserId(user1ID); !valid {
+	if valid, err := IsValidUserId(user1ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-	if valid, err := isValidUserId(user2ID); !valid {
+	if valid, err := IsValidUserId(user2ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
 	if user1ID == user2ID {

@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB_FOF(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
@@ -26,61 +26,61 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 		notInBody string
 	}{
 		{
-			name:     "✅ 友達の友達が返される（id1）",
+			name:     "1.友達の友達が返される（id1）",
 			userID:   "id1",
 			wantCode: http.StatusOK,
 			wantBody: "user13",
 		},
 		{
-			name:      "❌ 直接のフレンドは含まれない",
+			name:      "2.直接のフレンドは含まれない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user02",
 		},
 		{
-			name:      "❌ 自分がブロックしている相手は含まれない",
+			name:      "3.自分がブロックしている相手は含まれない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user18",
 		},
 		{
-			name:      "❌ 自分がブロックされている相手は含まれない",
+			name:      "4.自分がブロックされている相手は含まれない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user19",
 		},
 		{
-			name:      "❌ ブロックしている相手は含まれない",
+			name:      "5.ブロックしている相手は含まれない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user16",
 		},
 		{
-			name:      "❌ ブロックされている相手は含まれない",
+			name:      "6.ブロックされている相手は含まれない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user17",
 		},
 		{
-			name:     "❌ 存在しないID",
+			name:     "7.存在しないID",
 			userID:   "invalid_id",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user ID not found",
 		},
 		{
-			name:     "🟩 友達もブロックもないユーザー",
+			name:     "8.友達もブロックもないユーザー",
 			userID:   "id44",
 			wantCode: http.StatusOK,
 			wantBody: "no friends of friends found",
 		},
 		{
-			name:     "🟦 相互関係の友達の友達は重複しない",
+			name:     "9.相互関係の友達の友達は重複しない",
 			userID:   "id1",
 			wantCode: http.StatusOK,
 			wantBody: "user11",
 		},
 		{
-			name:     "🟨 共通の友人は重複しない",
+			name:     "10.共通の友人は重複しない",
 			userID:   "id1",
 			wantCode: http.StatusOK,
 			wantBody: "user12",
@@ -93,7 +93,7 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := GetFriendOfFriendList(c); err != nil {
+			if err := handler.GetFriendOfFriendList(c); err != nil {
 				t.Fatal(err)
 			}
 
@@ -108,16 +108,16 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 			if tc.notInBody != "" && strings.Contains(body, tc.notInBody) {
 				t.Errorf("含まれてはいけない文字列が含まれている: notWant=%q, got=%q", tc.notInBody, body)
 			}
-			if tc.name == "🟦 相互関係の友達の友達は重複しない" {
+			if tc.name == "9.相互関係の友達の友達は重複しない" {
 				count := strings.Count(rec.Body.String(), "user14")
 				if count > 1 {
-					t.Errorf("user14 が重複して含まれている: 出現数 = %d", count)
+					t.Errorf("11.user14 が重複して含まれている: 出現数 = %d", count)
 				}
 			}
-			if tc.name == "🟨 共通の友人は重複しない" {
+			if tc.name == "10.共通の友人は重複しない" {
 				count := strings.Count(rec.Body.String(), "user12")
 				if count > 1 {
-					t.Errorf("user12 が重複して含まれている: 出現数 = %d", count)
+					t.Errorf("12.user12 が重複して含まれている: 出現数 = %d", count)
 				}
 			}
 		})

@@ -1,16 +1,16 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 )
 
 func setupTestDB_Validation(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestIsValidUserId(t *testing.T) {
@@ -23,24 +23,24 @@ func TestIsValidUserId(t *testing.T) {
 		wantErr string
 	}{
 		{
-			name:   "✅ 有効なID",
+			name:   "1.有効なID",
 			userID: "id1",
 			wantOK: true,
 		},
 		{
-			name:    "❌ 空文字",
+			name:    "2.空文字",
 			userID:  "",
 			wantOK:  false,
 			wantErr: "invalid user ID format",
 		},
 		{
-			name:    "❌ 長すぎるID",
+			name:    "3.長すぎるID",
 			userID:  "1234567890123456789012345",
 			wantOK:  false,
 			wantErr: "invalid user ID format",
 		},
 		{
-			name:    "❌ 存在しないID",
+			name:    "4.存在しないID",
 			userID:  "invalid_id",
 			wantOK:  false,
 			wantErr: "user ID not found",
@@ -49,7 +49,7 @@ func TestIsValidUserId(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ok, err := isValidUserId(tc.userID)
+			ok, err := handler.IsValidUserId(tc.userID)
 			if ok != tc.wantOK {
 				t.Errorf("期待結果: %v, 実際: %v", tc.wantOK, ok)
 			}
@@ -69,12 +69,12 @@ func TestUserExists(t *testing.T) {
 		wantBool bool
 	}{
 		{
-			name:     "✅ 存在するID",
+			name:     "1.存在するID",
 			userID:   "id1",
 			wantBool: true,
 		},
 		{
-			name:     "❌ 存在しないID",
+			name:     "2.存在しないID",
 			userID:   "notfound",
 			wantBool: false,
 		},
@@ -82,7 +82,7 @@ func TestUserExists(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ok, err := userExists(tc.userID)
+			ok, err := handler.UserExists(tc.userID)
 			if err != nil {
 				t.Fatalf("予期しないエラー: %v", err)
 			}
@@ -105,26 +105,26 @@ func TestParseAndValidatePagination(t *testing.T) {
 		shouldFail bool
 	}{
 		{
-			name:      "✅ 正常な入力",
+			name:      "1.正常な入力",
 			limit:     "5",
 			page:      "2",
 			wantLimit: 5,
 			wantPage:  2,
 		},
 		{
-			name:       "❌ limitが負数",
+			name:       "2.limitが負数",
 			limit:      "-1",
 			page:       "1",
 			shouldFail: true,
 		},
 		{
-			name:       "❌ pageがゼロ",
+			name:       "3.pageがゼロ",
 			limit:      "5",
 			page:       "0",
 			shouldFail: true,
 		},
 		{
-			name:       "❌ 不正な文字列",
+			name:       "4.不正な文字列",
 			limit:      "abc",
 			page:       "xyz",
 			shouldFail: true,
@@ -137,7 +137,7 @@ func TestParseAndValidatePagination(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			limit, page, err := parseAndValidatePagination(c)
+			limit, page, err := handler.ParseAndValidatePagination(c)
 			if tc.shouldFail {
 				if err == nil {
 					t.Errorf("エラーが期待されたが nil が返された")

@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func InitTestDB() *gorm.DB {
+func initTestDB() *gorm.DB {
 	dsn := "root:@tcp(db:3306)/app?charset=utf8mb4&parseTime=True&loc=Local"
 	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 	if err != nil {

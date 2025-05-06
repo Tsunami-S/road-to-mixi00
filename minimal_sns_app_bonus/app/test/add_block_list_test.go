@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB_Block(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestAddBlockList_Scenarios(t *testing.T) {
@@ -26,42 +26,42 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 		wantBody string
 	}{
 		{
-			name:     "✅ ブロック成功（フレンド削除・申請拒否）",
+			name:     "1.ブロック成功（フレンド削除・申請拒否）",
 			user1ID:  "id1",
 			user2ID:  "id44",
 			wantCode: http.StatusOK,
 			wantBody: "user blocked",
 		},
 		{
-			name:     "❌ 自分自身をブロック",
+			name:     "2.自分自身をブロック",
 			user1ID:  "id1",
 			user2ID:  "id1",
 			wantCode: http.StatusBadRequest,
 			wantBody: "cannot block yourself",
 		},
 		{
-			name:     "❌ 既にブロック済み",
+			name:     "3.既にブロック済み（user1 -> user2）",
 			user1ID:  "id1",
 			user2ID:  "id39",
 			wantCode: http.StatusBadRequest,
 			wantBody: "already blocked",
 		},
 		{
-			name:     "❌ 既にブロック済み",
+			name:     "4.既にブロック済み（user2 -> user1）",
 			user1ID:  "id38",
 			user2ID:  "id1",
 			wantCode: http.StatusBadRequest,
 			wantBody: "already blocked",
 		},
 		{
-			name:     "❌ 存在しない user1_id",
+			name:     "5.存在しない user1_id",
 			user1ID:  "invalid_id",
 			user2ID:  "id2",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user1_id: user ID not found",
 		},
 		{
-			name:     "❌ 存在しない user2_id",
+			name:     "6.存在しない user2_id",
 			user1ID:  "id2",
 			user2ID:  "invalid_id",
 			wantCode: http.StatusBadRequest,
@@ -76,7 +76,7 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := AddBlockList(c); err != nil {
+			if err := handler.AddBlockList(c); err != nil {
 				t.Fatal(err)
 			}
 

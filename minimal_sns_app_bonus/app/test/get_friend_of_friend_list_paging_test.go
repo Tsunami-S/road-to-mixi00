@@ -1,7 +1,8 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -22,23 +23,23 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 		notInBody string
 	}{
 		{
-			name:     "✅ ページ1に特定のユーザーが含まれる",
+			name:     "1.ページ1に特定のユーザーが含まれる",
 			userID:   "id1",
 			limit:    "2",
 			page:     "1",
 			wantCode: http.StatusOK,
-			wantBody: "user13", // 1ページ目に出る
+			wantBody: "user13",
 		},
 		{
-			name:     "✅ ページ2に他のユーザーが出現する",
+			name:     "2.ページ2に他のユーザーが出現する",
 			userID:   "id1",
 			limit:    "2",
 			page:     "2",
 			wantCode: http.StatusOK,
-			wantBody: "user12", // 2ページ目に出る
+			wantBody: "user12",
 		},
 		{
-			name:     "🟩 最終ページはデータがない",
+			name:     "3.最終ページはデータがない",
 			userID:   "id1",
 			limit:    "2",
 			page:     "99",
@@ -46,7 +47,7 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			wantBody: "no friends of friends found",
 		},
 		{
-			name:     "❌ 存在しないID",
+			name:     "4.存在しないID",
 			userID:   "invalid_id",
 			limit:    "2",
 			page:     "1",
@@ -62,7 +63,7 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := GetFriendOfFriendListPaging(c); err != nil {
+			if err := handler.GetFriendOfFriendListPaging(c); err != nil {
 				t.Fatal(err)
 			}
 

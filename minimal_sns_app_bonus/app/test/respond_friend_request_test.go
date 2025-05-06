@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB_Respond(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestRespondFriendRequest_Scenarios(t *testing.T) {
@@ -27,7 +27,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 		wantBody string
 	}{
 		{
-			name:     "✅ 正常に申請を承認",
+			name:     "1.正常に申請を承認",
 			user1ID:  "id45",
 			user2ID:  "id1",
 			action:   "accepted",
@@ -35,7 +35,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "request accepted",
 		},
 		{
-			name:     "✅ 正常に申請を拒否",
+			name:     "2.正常に申請を拒否",
 			user1ID:  "id11",
 			user2ID:  "id27",
 			action:   "rejected",
@@ -43,7 +43,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "request rejected",
 		},
 		{
-			name:     "❌ 自分自身に応答",
+			name:     "3.自分自身に応答",
 			user1ID:  "id1",
 			user2ID:  "id1",
 			action:   "accepted",
@@ -51,7 +51,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "invalid user IDs",
 		},
 		{
-			name:     "❌ 存在しない申請",
+			name:     "4.存在しない申請",
 			user1ID:  "id3",
 			user2ID:  "id4",
 			action:   "accepted",
@@ -59,7 +59,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "request not found",
 		},
 		{
-			name:     "❌ 不正なアクション",
+			name:     "5.不正なアクション",
 			user1ID:  "id45",
 			user2ID:  "id1",
 			action:   "maybe",
@@ -67,7 +67,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "invalid action",
 		},
 		{
-			name:     "❌ 無効な user1_id",
+			name:     "6.無効な user1_id",
 			user1ID:  "invalid",
 			user2ID:  "id1",
 			action:   "accepted",
@@ -75,7 +75,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "user1_id: user ID not found",
 		},
 		{
-			name:     "❌ 無効な user2_id",
+			name:     "7.無効な user2_id",
 			user1ID:  "id1",
 			user2ID:  "invalid",
 			action:   "accepted",
@@ -93,7 +93,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := RespondFriendRequest(c); err != nil {
+			if err := handler.RespondFriendRequest(c); err != nil {
 				t.Fatal(err)
 			}
 

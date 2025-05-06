@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB_AddUser(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestAddNewUser_Scenarios(t *testing.T) {
@@ -26,42 +26,42 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 		wantBody string
 	}{
 		{
-			name:     "✅ ユーザー追加成功",
+			name:     "1.ユーザー追加成功",
 			id:       "new_user_1",
 			userName: "テストユーザー",
 			wantCode: http.StatusOK,
 			wantBody: "user added",
 		},
 		{
-			name:     "❌ 同じIDのユーザーが既に存在する",
+			name:     "2.同じIDのユーザーが既に存在する",
 			id:       "id1",
 			userName: "新しい名前",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user ID already exists",
 		},
 		{
-			name:     "❌ ID が空",
+			name:     "3.ID が空",
 			id:       "",
 			userName: "valid",
 			wantCode: http.StatusBadRequest,
 			wantBody: "id must have 1 ~ 20 characters",
 		},
 		{
-			name:     "❌ ID が長すぎる",
+			name:     "4.ID が長すぎる",
 			id:       strings.Repeat("a", 21),
 			userName: "valid",
 			wantCode: http.StatusBadRequest,
 			wantBody: "id must have 1 ~ 20 characters",
 		},
 		{
-			name:     "❌ 名前が空",
+			name:     "5.名前が空",
 			id:       "valid_id",
 			userName: "",
 			wantCode: http.StatusBadRequest,
 			wantBody: "name must have 1 ~ 64 characters",
 		},
 		{
-			name:     "❌ 名前が長すぎる",
+			name:     "6.名前が長すぎる",
 			id:       "valid_id",
 			userName: strings.Repeat("あ", 65),
 			wantCode: http.StatusBadRequest,
@@ -76,7 +76,7 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			err := AddNewUser(c)
+			err := handler.AddNewUser(c)
 			if err != nil {
 				t.Fatal(err)
 			}

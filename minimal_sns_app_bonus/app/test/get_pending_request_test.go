@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB_Pending(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestGetPendingRequests_Scenarios(t *testing.T) {
@@ -26,25 +26,25 @@ func TestGetPendingRequests_Scenarios(t *testing.T) {
 		notInBody string
 	}{
 		{
-			name:     "✅ id41 に保留中リクエストあり",
+			name:     "1.id41 に保留中リクエストあり",
 			userID:   "id41",
 			wantCode: http.StatusOK,
 			wantBody: `"user1_id":"id1"`,
 		},
 		{
-			name:     "✅ id46 にリクエスト（rejectedなので含まれない）",
+			name:     "2.id46 にリクエスト（rejectedなので含まれない）",
 			userID:   "id46",
 			wantCode: http.StatusOK,
 			wantBody: "no pending requests found",
 		},
 		{
-			name:     "✅ リクエストが0件（id5）",
+			name:     "3.リクエストが0件（id5）",
 			userID:   "id5",
 			wantCode: http.StatusOK,
 			wantBody: "no pending requests found",
 		},
 		{
-			name:     "❌ 無効なID",
+			name:     "4.無効なID",
 			userID:   "invalid_id",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user ID not found",
@@ -58,7 +58,7 @@ func TestGetPendingRequests_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			err := GetPendingRequests(c)
+			err := handler.GetPendingRequests(c)
 			if err != nil {
 				t.Fatal(err)
 			}

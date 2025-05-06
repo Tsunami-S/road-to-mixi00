@@ -11,7 +11,7 @@ func GetFriendOfFriendList(c echo.Context) error {
 	userID := c.QueryParam("id")
 
 	// validation
-	if valid, err := isValidUserId(userID); !valid {
+	if valid, err := IsValidUserId(userID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 

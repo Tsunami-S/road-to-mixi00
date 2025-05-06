@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestGetFriendList_Scenarios(t *testing.T) {
@@ -26,61 +26,61 @@ func TestGetFriendList_Scenarios(t *testing.T) {
 		notInBody string
 	}{
 		{
-			name:     "✅ 自分からのフレンドリンク",
+			name:     "1.自分からのフレンドリンク",
 			userID:   "id1",
 			wantCode: http.StatusOK,
 			wantBody: "user02",
 		},
 		{
-			name:     "✅ 相手からのフレンドリンク",
+			name:     "2.相手からのフレンドリンク",
 			userID:   "id1",
 			wantCode: http.StatusOK,
 			wantBody: "user04",
 		},
 		{
-			name:      "❌ ブロックしているユーザーは含めない",
+			name:      "3.ブロックしているユーザーは含めない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user39",
 		},
 		{
-			name:      "❌ 相手からブロックされているユーザーは含めない",
+			name:      "4.相手からブロックされているユーザーは含めない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user40",
 		},
 		{
-			name:      "❌ 無関係のユーザーは含めない",
+			name:      "5.無関係のユーザーは含めない",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user44",
 		},
 		{
-			name:     "❌ 存在しないID",
+			name:     "6.存在しないID",
 			userID:   "invalid_id",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user ID not found",
 		},
 		{
-			name:      "🟥 一方的にブロックされているユーザーは除外される",
+			name:      "7.一方的にブロックされているユーザーは除外される",
 			userID:    "id6",
 			wantCode:  http.StatusOK,
 			notInBody: "user03",
 		},
 		{
-			name:     "🟩 フレンドもブロックもない新規ユーザー",
+			name:     "8.フレンドもブロックもない新規ユーザー",
 			userID:   "id44",
 			wantCode: http.StatusOK,
 			wantBody: "no friends found",
 		},
 		{
-			name:     "🟦 相互にフレンド登録されたユーザーは重複しない",
+			name:     "9.相互にフレンド登録されたユーザーは重複しない",
 			userID:   "id1",
 			wantCode: http.StatusOK,
 			wantBody: "user10",
 		},
 		{
-			name:      "❌ 自分自身へのフレンド",
+			name:      "10.自分自身へのフレンド",
 			userID:    "id1",
 			wantCode:  http.StatusOK,
 			notInBody: "user01",
@@ -93,7 +93,7 @@ func TestGetFriendList_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := GetFriendList(c); err != nil {
+			if err := handler.GetFriendList(c); err != nil {
 				t.Fatal(err)
 			}
 
@@ -109,10 +109,10 @@ func TestGetFriendList_Scenarios(t *testing.T) {
 				t.Errorf("含まれてはいけない文字列が含まれている: notWant=%q, got=%q", tc.notInBody, body)
 			}
 
-			if tc.name == "🟦 相互にフレンド登録されたユーザーは重複しない" {
+			if tc.name == "9.相互にフレンド登録されたユーザーは重複しない" {
 				count := strings.Count(body, "user10")
 				if count > 1 {
-					t.Errorf("user10 が重複して含まれている: 出現数 = %d\nレスポンス: %s", count, body)
+					t.Errorf("11.user10 が重複して含まれている: 出現数 = %d\nレスポンス: %s", count, body)
 				}
 			}
 		})

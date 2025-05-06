@@ -10,7 +10,7 @@ import (
 func GetPendingRequests(c echo.Context) error {
 	userID := c.QueryParam("user_id")
 
-	if valid, err := isValidUserId(userID); !valid {
+	if valid, err := IsValidUserId(userID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 
@@ -33,7 +33,6 @@ func GetPendingRequests(c echo.Context) error {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch requests"})
 	}
 
-	// ✅ データが存在しない場合、エラーメッセージを返す
 	if len(requests) == 0 {
 		return c.JSON(http.StatusOK, map[string]string{"message": "no pending requests found"})
 	}

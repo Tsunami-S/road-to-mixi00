@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -11,7 +11,7 @@ import (
 )
 
 func setupTestDB_Request(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = initTestDB()
 }
 
 func TestRequestFriend_Scenarios(t *testing.T) {
@@ -26,70 +26,70 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 		wantBody string
 	}{
 		{
-			name:     "✅ 正常なフレンド申請",
+			name:     "1.正常なフレンド申請",
 			user1ID:  "id32",
 			user2ID:  "id43",
 			wantCode: http.StatusOK,
 			wantBody: "friend request sent",
 		},
 		{
-			name:     "❌ 自分自身に申請",
+			name:     "2.自分自身に申請",
 			user1ID:  "id1",
 			user2ID:  "id1",
 			wantCode: http.StatusBadRequest,
 			wantBody: "cannot request yourself",
 		},
 		{
-			name:     "❌ ブロックしている",
+			name:     "3.ブロックしている",
 			user1ID:  "id1",
 			user2ID:  "id39",
 			wantCode: http.StatusBadRequest,
 			wantBody: "cannot send friend request due to block",
 		},
 		{
-			name:     "❌ ブロックされている",
+			name:     "4.ブロックされている",
 			user1ID:  "id1",
 			user2ID:  "id40",
 			wantCode: http.StatusBadRequest,
 			wantBody: "cannot send friend request due to block",
 		},
 		{
-			name:     "❌ すでにフレンド",
+			name:     "5.すでにフレンド",
 			user1ID:  "id1",
 			user2ID:  "id2",
 			wantCode: http.StatusBadRequest,
 			wantBody: "you are already friends",
 		},
 		{
-			name:     "❌ すでにフレンド(相手から)",
+			name:     "6.すでにフレンド(相手から)",
 			user1ID:  "id1",
 			user2ID:  "id4",
 			wantCode: http.StatusBadRequest,
 			wantBody: "you are already friends",
 		},
 		{
-			name:     "❌ 逆方向にpendingな申請がある",
+			name:     "7.逆方向にpendingな申請がある",
 			user1ID:  "id41",
 			user2ID:  "id1", 
 			wantCode: http.StatusBadRequest,
 			wantBody: "you already have a pending request from this user",
 		},
 		{
-			name:     "❌ 同じ方向の申請がすでにある",
+			name:     "8.同じ方向の申請がすでにある",
 			user1ID:  "id1",
 			user2ID:  "id27",
 			wantCode: http.StatusBadRequest,
 			wantBody: "friend request already sent",
 		},
 		{
-			name:     "❌ 存在しない user1_id",
+			name:     "9.存在しない user1_id",
 			user1ID:  "invalid_user",
 			user2ID:  "id2",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user1_id: user ID not found",
 		},
 		{
-			name:     "❌ 存在しない user2_id",
+			name:     "10.存在しない user2_id",
 			user1ID:  "id2",
 			user2ID:  "invalid_user",
 			wantCode: http.StatusBadRequest,
@@ -104,7 +104,7 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := RequestFriend(c); err != nil {
+			if err := handler.RequestFriend(c); err != nil {
 				t.Fatal(err)
 			}
 
