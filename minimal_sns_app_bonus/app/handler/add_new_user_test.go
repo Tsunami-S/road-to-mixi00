@@ -33,6 +33,13 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 			wantBody: "user added",
 		},
 		{
+			name:     "❌ 同じIDのユーザーが既に存在する",
+			id:       "id1",
+			userName: "新しい名前",
+			wantCode: http.StatusBadRequest,
+			wantBody: "user ID already exists",
+		},
+		{
 			name:     "❌ ID が空",
 			id:       "",
 			userName: "valid",

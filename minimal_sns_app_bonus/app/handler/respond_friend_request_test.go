@@ -67,12 +67,20 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			wantBody: "invalid action",
 		},
 		{
-			name:     "❌ 無効な user_id",
+			name:     "❌ 無効な user1_id",
 			user1ID:  "invalid",
 			user2ID:  "id1",
 			action:   "accepted",
 			wantCode: http.StatusBadRequest,
 			wantBody: "user1_id: user ID not found",
+		},
+		{
+			name:     "❌ 無効な user2_id",
+			user1ID:  "id1",
+			user2ID:  "invalid",
+			action:   "accepted",
+			wantCode: http.StatusBadRequest,
+			wantBody: "user2_id: user ID not found",
 		},
 	}
 

@@ -40,9 +40,16 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 			wantBody: "cannot request yourself",
 		},
 		{
-			name:     "❌ ブロックされている",
+			name:     "❌ ブロックしている",
 			user1ID:  "id1",
 			user2ID:  "id39",
+			wantCode: http.StatusBadRequest,
+			wantBody: "cannot send friend request due to block",
+		},
+		{
+			name:     "❌ ブロックされている",
+			user1ID:  "id1",
+			user2ID:  "id40",
 			wantCode: http.StatusBadRequest,
 			wantBody: "cannot send friend request due to block",
 		},
@@ -54,16 +61,23 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 			wantBody: "you are already friends",
 		},
 		{
+			name:     "❌ すでにフレンド(相手から)",
+			user1ID:  "id1",
+			user2ID:  "id4",
+			wantCode: http.StatusBadRequest,
+			wantBody: "you are already friends",
+		},
+		{
 			name:     "❌ 逆方向にpendingな申請がある",
 			user1ID:  "id41",
-			user2ID:  "id1", // id1 → id44 にすでにpending申請あり
+			user2ID:  "id1", 
 			wantCode: http.StatusBadRequest,
 			wantBody: "you already have a pending request from this user",
 		},
 		{
 			name:     "❌ 同じ方向の申請がすでにある",
 			user1ID:  "id1",
-			user2ID:  "id27", // id1 → id45 にすでにpending申請あり
+			user2ID:  "id27",
 			wantCode: http.StatusBadRequest,
 			wantBody: "friend request already sent",
 		},

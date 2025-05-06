@@ -47,6 +47,13 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 			wantBody: "already blocked",
 		},
 		{
+			name:     "❌ 既にブロック済み",
+			user1ID:  "id38",
+			user2ID:  "id1",
+			wantCode: http.StatusBadRequest,
+			wantBody: "already blocked",
+		},
+		{
 			name:     "❌ 存在しない user1_id",
 			user1ID:  "invalid_id",
 			user2ID:  "id2",

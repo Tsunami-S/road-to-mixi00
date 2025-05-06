@@ -18,7 +18,13 @@ func AddNewUser(c echo.Context) error {
 	if name == "" || len(name) > 64 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name must have 1 ~ 64 characters"})
 	}
-
+	var count int64
+	if err := db.DB.Model(&model.User{}).Where("user_id = ?", id).Count(&count).Error; err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to check user ID uniqueness"})
+	}
+	if count > 0 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user ID already exists"})
+	}
 	// add new user
 	user := model.User{UserID: id, Name: name}
 	if err := db.DB.Create(&user).Error; err != nil {
