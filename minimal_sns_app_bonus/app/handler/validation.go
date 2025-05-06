@@ -1,12 +1,30 @@
 package handler
 
 import (
+	"errors"
 	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 	"strconv"
 )
+
+func isValidUserId(id string) (bool, error) {
+	if id == "" || len(id) > 20 {
+		return false, errors.New("invalid user ID format")
+	}
+
+	var count int64
+	err := db.DB.Model(&model.User{}).Where("user_id = ?", id).Count(&count).Error
+	if err != nil {
+		return false, errors.New("DB error while checking user ID")
+	}
+	if count == 0 {
+		return false, errors.New("user ID not found")
+	}
+
+	return true, nil
+}
 
 func userExists(id string) (bool, error) {
 	var user model.User

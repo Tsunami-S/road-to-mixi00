@@ -8,10 +8,11 @@ import (
 )
 
 func GetPendingRequests(c echo.Context) error {
-	// validation
 	userID := c.QueryParam("user_id")
-	if userID == "" {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id is required"})
+
+	// validation
+	if valid, err := isValidUserId(userID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 
 	// get request

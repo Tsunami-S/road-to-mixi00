@@ -13,7 +13,13 @@ func RespondFriendRequest(c echo.Context) error {
 	action := c.QueryParam("action")
 
 	// validation
-	if user1ID == "" || user2ID == "" || user1ID == user2ID {
+	if valid, err := isValidUserId(user1ID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
+	}
+	if valid, err := isValidUserId(user2ID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
+	}
+	if user1ID == user2ID {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
 	}
 	if action != "accepted" && action != "rejected" {
@@ -22,7 +28,7 @@ func RespondFriendRequest(c echo.Context) error {
 
 	// check REQUEST status
 	var req model.FriendRequest
-	err := db.DB.Where("user1_id = ? AND user2_id = ? AND status = 'pending'", user1ID, user2ID).First(&req).Error
+	err := db.DB.Where("user2_id = ? AND user2_id = ? AND status = 'pending'", user1ID, user2ID).First(&req).Error
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "request not found or already handled"})
 	}

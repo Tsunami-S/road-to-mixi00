@@ -12,18 +12,14 @@ func RequestFriend(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 
 	// validation
-	if len(user1ID) == 0 || len(user2ID) == 0 || user1ID == user2ID {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
+	if valid, err := isValidUserId(user1ID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-
-	// check FRIEND status
-	var friend model.FriendLink
-	err_friend := db.DB.Where(
-		"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-		user1ID, user2ID, user2ID, user1ID,
-	).First(&friend).Error
-	if err_friend == nil {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you are already friends"})
+	if valid, err := isValidUserId(user2ID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
+	}
+	if user1ID == user2ID {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot request yourself"})
 	}
 
 	// check BLOCK status
@@ -34,6 +30,16 @@ func RequestFriend(c echo.Context) error {
 	).First(&block).Error
 	if err_block == nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot send friend request due to block"})
+	}
+
+	// check FRIEND status
+	var friend model.FriendLink
+	err_friend := db.DB.Where(
+		"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
+		user1ID, user2ID, user2ID, user1ID,
+	).First(&friend).Error
+	if err_friend == nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you are already friends"})
 	}
 
 	// check APPLICATION status

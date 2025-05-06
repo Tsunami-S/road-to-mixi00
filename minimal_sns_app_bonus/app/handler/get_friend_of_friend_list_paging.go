@@ -8,18 +8,11 @@ import (
 )
 
 func GetFriendOfFriendListPaging(c echo.Context) error {
-	id := c.QueryParam("id")
+	userID := c.QueryParam("id")
 
 	// validation
-	if id == "" || len(id) > 20 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be 1 ~ 20 characters"})
-	}
-	exist, err := userExists(id)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
-	}
-	if !exist {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
+	if valid, err := isValidUserId(userID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 	limit, page, err := parseAndValidatePagination(c)
 	if err != nil {
@@ -28,7 +21,7 @@ func GetFriendOfFriendListPaging(c echo.Context) error {
 
 	// get friend list with paging
 	offset := (page - 1) * limit
-	result, err := getFriendOfFriendByIDWithPaging(id, limit, offset)
+	result, err := getFriendOfFriendByIDWithPaging(userID, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

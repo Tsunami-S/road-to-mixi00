@@ -12,8 +12,11 @@ func AddBlockList(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 
 	// validation
-	if user1ID == "" || user2ID == "" || len(user1ID) > 20 || len(user2ID) > 20 {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
+	if valid, err := isValidUserId(user1ID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
+	}
+	if valid, err := isValidUserId(user2ID); !valid {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
 	if user1ID == user2ID {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot block yourself"})
