@@ -1,7 +1,8 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -21,38 +22,10 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 		wantBody  string
 		notInBody string
 	}{
-		{
-			name:     "✅ ページ1に特定のユーザーが含まれる",
-			userID:   "1",
-			limit:    "2",
-			page:     "1",
-			wantCode: http.StatusOK,
-			wantBody: "user11",
-		},
-		{
-			name:     "✅ ページ2に他のユーザーが出現する",
-			userID:   "1",
-			limit:    "2",
-			page:     "2",
-			wantCode: http.StatusOK,
-			wantBody: "user13",
-		},
-		{
-			name:     "🟩 最終ページはデータがない",
-			userID:   "1",
-			limit:    "2",
-			page:     "99",
-			wantCode: http.StatusOK,
-			wantBody: "no friends of friends found",
-		},
-		{
-			name:     "❌ 存在しないID",
-			userID:   "9999",
-			limit:    "2",
-			page:     "1",
-			wantCode: http.StatusBadRequest,
-			wantBody: "user not found",
-		},
+		{"1.ページ1に特定のユーザーが含まれる", "1", "2", "1", http.StatusOK, "user11", ""},
+		{"2.ページ2に他のユーザーが出現する", "1", "2", "2", http.StatusOK, "user13", ""},
+		{"3.最終ページはデータがない", "1", "2", "99", http.StatusOK, "no friends of friends found", ""},
+		{"4.存在しないID", "9999", "2", "1", http.StatusBadRequest, "user not found", ""},
 	}
 
 	for _, tc := range tests {
@@ -62,7 +35,7 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := GetFriendOfFriendListPaging(c); err != nil {
+			if err := handler.GetFriendOfFriendListPaging(c); err != nil {
 				t.Fatal(err)
 			}
 
@@ -80,3 +53,4 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 		})
 	}
 }
+

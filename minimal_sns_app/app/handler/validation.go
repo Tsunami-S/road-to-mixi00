@@ -8,7 +8,7 @@ import (
 	"strconv"
 )
 
-func userExists(id int) (bool, error) {
+func UserExists(id int) (bool, error) {
 	var user model.User
 	err := db.DB.Where("user_id = ?", id).First(&user).Error
 	if err != nil {
@@ -20,7 +20,7 @@ func userExists(id int) (bool, error) {
 	return true, nil
 }
 
-func parseAndValidatePagination(c echo.Context) (limit int, page int, err error) {
+func ParseAndValidatePagination(c echo.Context) (limit int, page int, err error) {
 	limitStr := c.QueryParam("limit")
 	pageStr := c.QueryParam("page")
 

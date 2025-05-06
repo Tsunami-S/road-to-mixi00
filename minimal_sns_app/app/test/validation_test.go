@@ -1,9 +1,9 @@
-package handler
+package test
 
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/test"
+	"minimal_sns_app/handler"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,38 +20,11 @@ func TestParseAndValidatePagination(t *testing.T) {
 		wantLimit int
 		wantPage  int
 	}{
-		{
-			name:      "✅ 正常な値",
-			limit:     "5",
-			page:      "2",
-			wantErr:   false,
-			wantLimit: 5,
-			wantPage:  2,
-		},
-		{
-			name:    "❌ limit が負数",
-			limit:   "-1",
-			page:    "1",
-			wantErr: true,
-		},
-		{
-			name:    "❌ page がゼロ",
-			limit:   "5",
-			page:    "0",
-			wantErr: true,
-		},
-		{
-			name:    "❌ 数値でない",
-			limit:   "abc",
-			page:    "xyz",
-			wantErr: true,
-		},
-		{
-			name:    "❌ 空文字",
-			limit:   "",
-			page:    "",
-			wantErr: true,
-		},
+		{"1.正常な値", "5", "2", false, 5, 2},
+		{"2.limit が負数", "-1", "1", true, 0, 0},
+		{"3.page がゼロ", "5", "0", true, 0, 0},
+		{"4.数値でない", "abc", "xyz", true, 0, 0},
+		{"5.空文字", "", "", true, 0, 0},
 	}
 
 	for _, tc := range tests {
@@ -60,7 +33,7 @@ func TestParseAndValidatePagination(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			limit, page, err := parseAndValidatePagination(c)
+			limit, page, err := handler.ParseAndValidatePagination(c) // ← handler経由
 			if tc.wantErr && err == nil {
 				t.Errorf("期待したエラーが返らなかった")
 			}
@@ -78,7 +51,7 @@ func TestParseAndValidatePagination(t *testing.T) {
 }
 
 func TestUserExists(t *testing.T) {
-	db.DB = test.InitTestDB()
+	db.DB = InitTestDB()
 
 	tests := []struct {
 		name       string
@@ -86,12 +59,12 @@ func TestUserExists(t *testing.T) {
 		wantExists bool
 	}{
 		{
-			name:       "✅ 存在するユーザー",
+			name:       "1.存在するユーザー（id=1）",
 			userID:     1,
 			wantExists: true,
 		},
 		{
-			name:       "❌ 存在しないユーザー",
+			name:       "2.存在しないユーザー（id=9999）",
 			userID:     9999,
 			wantExists: false,
 		},
@@ -99,12 +72,12 @@ func TestUserExists(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			exists, err := userExists(tc.userID)
+			exists, err := handler.UserExists(tc.userID)
 			if err != nil {
 				t.Errorf("エラーが発生しました: %v", err)
 			}
 			if exists != tc.wantExists {
-				t.Errorf("期待値と異なります: got=%v, want=%v", exists, tc.wantExists)
+				t.Errorf("存在チェック結果が期待と異なります: got=%v, want=%v", exists, tc.wantExists)
 			}
 		})
 	}

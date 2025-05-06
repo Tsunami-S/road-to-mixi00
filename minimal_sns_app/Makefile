@@ -25,7 +25,7 @@ test-restart:
 	$(TEST_COMPOSE) down -v && $(TEST_COMPOSE) up -d
 
 test:
-	$(COMPOSE) exec app go test ./handler -v
+	$(COMPOSE) exec app go test ./test -v
 
 
 log:

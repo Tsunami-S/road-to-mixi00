@@ -5,6 +5,8 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"time"
+	"minimal_sns_app/db"
+	"testing"
 )
 
 func InitTestDB() *gorm.DB {
@@ -18,4 +20,12 @@ func InitTestDB() *gorm.DB {
 	sqlDB.SetMaxIdleConns(5)
 	sqlDB.SetConnMaxLifetime(time.Hour)
 	return db
+}
+
+func setupTestDB(t *testing.T) {
+	db.DB = InitTestDB()
+}
+
+func setupTestDB_FOF(t *testing.T) {
+	db.DB = InitTestDB()
 }
