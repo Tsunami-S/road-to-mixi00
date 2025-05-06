@@ -1,11 +1,11 @@
 INSERT INTO users (user_id, name) VALUES
-  ('id01', 'user01'), ('id02', 'user02'), ('id03', 'user03'), ('id04', 'user04'), ('id05', 'user05'), ('id06', 'user06'), ('id07', 'user07'), ('id08', 'user08'), ('id09', 'user09'), ('id10', 'user10'), ('id11', 'user11'), ('id12', 'user12');
+  ('id1', 'user01'), ('id2', 'user02'), ('id3', 'user03'), ('id4', 'user04'), ('id5', 'user05'), ('id6', 'user06'), ('id7', 'user07'), ('id8', 'user08'), ('id9', 'user09'), ('id10', 'user10'), ('id11', 'user11'), ('id12', 'user12'), ('id13', 'user13'), ('id14', 'user14'), ('id15', 'user15'), ('id16', 'user16'), ('id17', 'user17'), ('id18', 'user18'), ('id19', 'user19'), ('id20', 'user20'), ('id21', 'user21'), ('id22', 'user22'), ('id23', 'user23'), ('id24', 'user24'), ('id25', 'user25'), ('id26', 'user26'), ('id27', 'user27'), ('id28', 'user28'), ('id29', 'user29'), ('id30', 'user30'), ('id31', 'user31'), ('id32', 'user32'), ('id33', 'user33'), ('id34', 'user34'), ('id35', 'user35'), ('id36', 'user36'), ('id37', 'user37'), ('id38', 'user38'), ('id39', 'user39'), ('id40', 'user40'), ('id41', 'user41'), ('id42', 'user42'), ('id43', 'user43'), ('id44', 'user44'), ('id45', 'user45'), ('id46', 'user46');
 
 INSERT INTO friend_link (user1_id, user2_id) VALUES
-  ('id01', 'id02'), ('id01', 'id03'), ('id04', 'id01'), ('id05', 'id01'), ('id02', 'id03'),  ('id02', 'id06'), ('id02', 'id07'), ('id08', 'id02'), ('id09', 'id02');
+  ('id1', 'id2'), ('id1', 'id3'), ('id1', 'id6'), ('id1', 'id7'), ('id1', 'id8'), ('id1', 'id9'), ('id5', 'id1'), ('id4', 'id1'), ('id24', 'id1'), ('id23', 'id1'), ('id1', 'id22'), ('id1', 'id21'), ('id1', 'id10'), ('id10', 'id1'), ('id2', 'id3'), ('id3', 'id39'), ('id3', 'id40'), ('id19', 'id2'), ('id18', 'id2'), ('id16', 'id2'), ('id17', 'id2'), ('id2', 'id14'), ('id2', 'id15'), ('id13', 'id2'), ('id2', 'id11'), ('id2', 'id12'), ('id12', 'id2'), ('id5', 'id37'), ('id5', 'id38'), ('id5', 'id36'), ('id36', 'id5'), ('id31', 'id5'), ('id5', 'id32'), ('id5', 'id4'), ('id4', 'id30'), ('id4', 'id29'), ('id28', 'id4'), ('id27', 'id4'), ('id26', 'id4'), ('id25', 'id4');
 
 INSERT INTO block_list (user1_id, user2_id) VALUES
-  ('id01', 'id07'), ('id09', 'id01');
+  ('id1', 'id39'), ('id40', 'id1'), ('id38', 'id1'), ('id1', 'id37'), ('id7', 'id3'), ('id3', 'id6'), ('id41', 'id3'), ('id3', 'id41'), ('id42', 'id3'), ('id3', 'id43'), ('id17', 'id2'), ('id2', 'id16'), ('id2', 'id15'), ('id14', 'id2'), ('id19', 'id1'), ('id1', 'id18'), ('id1', 'id20'), ('id20', 'id1'), ('id21', 'id1'), ('id1', 'id22'), ('id23', 'id1'), ('id1', 'id24'), ('id26', 'id1'), ('id1', 'id25'), ('id4', 'id27'), ('id28', 'id4'), ('id4', 'id29'), ('id30', 'id4'), ('id33', 'id5'), ('id5', 'id34'), ('id35', 'id5'), ('id5', 'id35'), ('id5', 'id9'), ('id8', 'id5'), ('id1', 'id1');
 
 INSERT INTO friend_requests (user1_id, user2_id, status) VALUES
-  ('id01', 'id10', 'pending'), ('id11', 'id01', 'pending');
+  ('id1', 'id44', 'pending'), ('id1', 'id45', 'pending'), ('id1', 'id46', 'rejected'), ('id45', 'id1', 'pending'), ('id1', 'id1', 'pending');

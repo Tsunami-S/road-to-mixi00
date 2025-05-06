@@ -26,5 +26,17 @@ func main() {
 	e.GET("/all_friends", handler.GetAllFriendLinks)
 	e.GET("/all_blocks", handler.GetAllBlockList)
 
+	// for error
+	e.HTTPErrorHandler = func(err error, c echo.Context) {
+		if c.Response().Committed {
+			return
+		}
+		code := http.StatusNotFound
+		if he, ok := err.(*echo.HTTPError); ok {
+			code = he.Code
+		}
+		c.JSON(code, map[string]string{"error": "invalid endpoint"})
+	}
+
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(conf.Server.Port)))
 }
