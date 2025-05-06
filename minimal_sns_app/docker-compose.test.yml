@@ -1,0 +1,5 @@
+services:
+  db:
+    volumes:
+      - ./mysql/0_init.sql:/docker-entrypoint-initdb.d/0_init.sql
+      - ./mysql/test.sql:/docker-entrypoint-initdb.d/test.sql

@@ -28,7 +28,7 @@ func RespondFriendRequest(c echo.Context) error {
 
 	// check REQUEST status
 	var req model.FriendRequest
-	err := db.DB.Where("user2_id = ? AND user2_id = ? AND status = 'pending'", user1ID, user2ID).First(&req).Error
+	err := db.DB.Where("user1_id = ? AND user2_id = ? AND status = 'pending'", user1ID, user2ID).First(&req).Error
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "request not found or already handled"})
 	}
