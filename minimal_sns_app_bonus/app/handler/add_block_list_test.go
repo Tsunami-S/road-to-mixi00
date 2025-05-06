@@ -28,7 +28,7 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 		{
 			name:     "✅ ブロック成功（フレンド削除・申請拒否）",
 			user1ID:  "id1",
-			user2ID:  "id44", // pending中のフレンド申請あり
+			user2ID:  "id44",
 			wantCode: http.StatusOK,
 			wantBody: "user blocked",
 		},
@@ -42,7 +42,7 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 		{
 			name:     "❌ 既にブロック済み",
 			user1ID:  "id1",
-			user2ID:  "id39", // test.sql で事前にブロック関係
+			user2ID:  "id39",
 			wantCode: http.StatusBadRequest,
 			wantBody: "already blocked",
 		},

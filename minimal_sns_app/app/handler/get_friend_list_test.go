@@ -77,7 +77,7 @@ func TestGetFriendList_Scenarios(t *testing.T) {
 			name:     "🟦 相互にフレンド登録されたユーザーは重複しない",
 			userID:   "1",
 			wantCode: http.StatusOK,
-			wantBody: "user10", // 後で count で重複確認
+			wantBody: "user10",
 		},
 		{
 			name:      "❌ 自分自身へのフレンド",
@@ -109,7 +109,6 @@ func TestGetFriendList_Scenarios(t *testing.T) {
 				t.Errorf("含まれてはいけない文字列が含まれている: notWant=%q, got=%q", tc.notInBody, body)
 			}
 
-			// 特別処理: 重複チェック（相互フレンドの重複防止）
 			if tc.name == "🟦 相互にフレンド登録されたユーザーは重複しない" {
 				count := strings.Count(body, "user10")
 				if count > 1 {

@@ -27,7 +27,7 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			limit:    "2",
 			page:     "1",
 			wantCode: http.StatusOK,
-			wantBody: "user11", // 1ページ目に出る
+			wantBody: "user11",
 		},
 		{
 			name:     "✅ ページ2に他のユーザーが出現する",
@@ -35,7 +35,7 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			limit:    "2",
 			page:     "2",
 			wantCode: http.StatusOK,
-			wantBody: "user13", // 2ページ目に出る
+			wantBody: "user13",
 		},
 		{
 			name:     "🟩 最終ページはデータがない",

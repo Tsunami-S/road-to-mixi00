@@ -29,13 +29,13 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 			name:     "✅ 友達の友達が返される（id1）",
 			userID:   "1",
 			wantCode: http.StatusOK,
-			wantBody: "user13", // id2 のフレンド → 友達の友達
+			wantBody: "user13",
 		},
 		{
 			name:      "❌ 直接のフレンドは含まれない",
 			userID:    "1",
 			wantCode:  http.StatusOK,
-			notInBody: "user02", // id2 は直接のフレンド
+			notInBody: "user02",
 		},
 		{
 			name:      "❌ 自分がブロックしている相手は含まれない",
