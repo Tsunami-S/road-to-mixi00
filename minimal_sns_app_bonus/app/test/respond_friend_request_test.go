@@ -1,12 +1,13 @@
 package test
 
 import (
-	"minimal_sns_app/db"
-	"minimal_sns_app/handler/create"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"minimal_sns_app/db"
+	"minimal_sns_app/handler/create"
 
 	"github.com/labstack/echo/v4"
 )

@@ -2,9 +2,10 @@ package validate
 
 import (
 	"errors"
-	repo_valid "minimal_sns_app/repository/validate"
 	"net/http"
 	"strconv"
+
+	repo_valid "minimal_sns_app/repository/validate"
 
 	"github.com/labstack/echo/v4"
 )

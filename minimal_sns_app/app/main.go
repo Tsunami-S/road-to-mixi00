@@ -1,12 +1,13 @@
 package main
 
 import (
+	"net/http"
+	"strconv"
+
 	"minimal_sns_app/configs"
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
 	"minimal_sns_app/handler/get_all"
-	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )

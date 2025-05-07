@@ -4,9 +4,10 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"minimal_sns_app/model"
 	"os"
 	"time"
+
+	"minimal_sns_app/model"
 )
 
 var DB *gorm.DB

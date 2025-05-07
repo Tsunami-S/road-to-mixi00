@@ -1,10 +1,11 @@
 package get
 
 import (
-	repo_get "minimal_sns_app/repository/get"
-	"minimal_sns_app/repository/validate"
 	"net/http"
 	"strconv"
+
+	repo_get "minimal_sns_app/repository/get"
+	"minimal_sns_app/repository/validate"
 
 	"github.com/labstack/echo/v4"
 )

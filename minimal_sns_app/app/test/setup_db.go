@@ -4,10 +4,11 @@ import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	"log"
-	"minimal_sns_app/db"
 	"os"
 	"testing"
 	"time"
+
+	"minimal_sns_app/db"
 )
 
 func InitTestDB() *gorm.DB {

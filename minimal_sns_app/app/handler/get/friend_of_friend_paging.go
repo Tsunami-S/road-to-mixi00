@@ -1,11 +1,12 @@
 package get
 
 import (
+	"net/http"
+	"strconv"
+
 	handle_valid "minimal_sns_app/handler/validate"
 	repo_get "minimal_sns_app/repository/get"
 	rep_valid "minimal_sns_app/repository/validate"
-	"net/http"
-	"strconv"
 
 	"github.com/labstack/echo/v4"
 )

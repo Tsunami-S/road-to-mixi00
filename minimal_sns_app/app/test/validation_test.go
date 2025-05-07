@@ -1,12 +1,13 @@
 package test
 
 import (
-	"minimal_sns_app/db"
-	handle_valid "minimal_sns_app/handler/validate"
-	rep_valid "minimal_sns_app/repository/validate"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"minimal_sns_app/db"
+	handle_valid "minimal_sns_app/handler/validate"
+	rep_valid "minimal_sns_app/repository/validate"
 
 	"github.com/labstack/echo/v4"
 )
