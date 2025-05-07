@@ -2,7 +2,7 @@ package get
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository/validation"
+	"minimal_sns_app/repository/validate"
 	repo_get "minimal_sns_app/repository/get"
 	"net/http"
 	"strconv"
@@ -19,9 +19,9 @@ func FriendOfFriend(c echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
 	}
-	exist, err := validation.UserExists(id)
+	exist, err := validate.UserExists(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	if !exist {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})

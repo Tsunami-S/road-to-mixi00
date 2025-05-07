@@ -1,13 +1,13 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/configs"
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
-	"minimal_sns_app/handler/all"
+	"minimal_sns_app/handler/get_all"
 	"net/http"
 	"strconv"
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -24,9 +24,9 @@ func main() {
 	e.GET("/get_friend_of_friend_list_paging", get.FriendOfFriendPaging)
 
 	// for debug
-	e.GET("/all_users", all.Users)
-	e.GET("/all_friends", all.FriendLinks)
-	e.GET("/all_blocks", all.BlockList)
+	e.GET("/all_users", get_all.Users)
+	e.GET("/all_friends", get_all.FriendLinks)
+	e.GET("/all_blocks", get_all.BlockList)
 
 	// for error
 	e.HTTPErrorHandler = func(err error, c echo.Context) {

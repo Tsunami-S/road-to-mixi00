@@ -1,4 +1,4 @@
-package validation
+package validate
 
 import (
 	"gorm.io/gorm"
@@ -6,7 +6,7 @@ import (
 	"minimal_sns_app/model"
 )
 
-func UserExists(id int) (bool, error) {
+func UserExists(id string) (bool, error) {
 	var user model.User
 	err := db.DB.Where("user_id = ?", id).First(&user).Error
 	if err != nil {

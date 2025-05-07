@@ -1,10 +1,11 @@
-package validation
+package validate
 
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	repo_valid "minimal_sns_app/repository/validation"
+	repo_valid "minimal_sns_app/repository/validate"
 	"strconv"
+	"net/http"
 )
 
 func IsValidUserId(id string) (bool, error) {
@@ -29,12 +30,12 @@ func ParseAndValidatePagination(c echo.Context) (limit int, page int, err error)
 
 	limit, err = strconv.Atoi(limitStr)
 	if err != nil || limit <= 0 {
-		return 0, 0, echo.NewHTTPError(400, "error: invalid limit")
+		return 0, 0, echo.NewHTTPError(http.StatusBadRequest, "error: invalid limit")
 	}
 
 	page, err = strconv.Atoi(pageStr)
 	if err != nil || page <= 0 {
-		return 0, 0, echo.NewHTTPError(400, "error: invalid page")
+		return 0, 0, echo.NewHTTPError(http.StatusBadRequest, "error: invalid page")
 	}
 
 	return limit, page, nil

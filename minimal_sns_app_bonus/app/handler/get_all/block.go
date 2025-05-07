@@ -1,8 +1,8 @@
-package all
+package get_all
 
 import (
 	"github.com/labstack/echo/v4"
-	repo_all "minimal_sns_app/repository/all"
+	repo_all "minimal_sns_app/repository/get_all"
 	"net/http"
 )
 

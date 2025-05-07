@@ -3,8 +3,8 @@ package test
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/handler/validation"
-	repo_valid "minimal_sns_app/repository/validation"
+	handle_valid "minimal_sns_app/handler/validate"
+	repo_valid "minimal_sns_app/repository/validate"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -50,7 +50,7 @@ func TestIsValidUserId(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ok, err := validation.IsValidUserId(tc.userID)
+			ok, err := handle_valid.IsValidUserId(tc.userID)
 			if ok != tc.wantOK {
 				t.Errorf("期待結果: %v, 実際: %v", tc.wantOK, ok)
 			}
@@ -138,7 +138,7 @@ func TestParseAndValidatePagination(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			limit, page, err := validation.ParseAndValidatePagination(c)
+			limit, page, err := handle_valid.ParseAndValidatePagination(c)
 			if tc.shouldFail {
 				if err == nil {
 					t.Errorf("エラーが期待されたが nil が返された")

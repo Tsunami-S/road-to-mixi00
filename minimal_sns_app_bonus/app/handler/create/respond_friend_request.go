@@ -2,7 +2,7 @@ package create
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/handler/validation"
+	"minimal_sns_app/handler/validate"
 	repo_create "minimal_sns_app/repository/create"
 	"net/http"
 )
@@ -13,10 +13,10 @@ func RespondRequest(c echo.Context) error {
 	action := c.QueryParam("action")
 
 	// validation
-	if valid, err := validation.IsValidUserId(user1ID); !valid {
+	if valid, err := validate.IsValidUserId(user1ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-	if valid, err := validation.IsValidUserId(user2ID); !valid {
+	if valid, err := validate.IsValidUserId(user2ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
 	if user1ID == user2ID {

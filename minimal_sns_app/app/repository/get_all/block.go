@@ -1,4 +1,4 @@
-package all
+package get_all
 
 import (
 	"minimal_sns_app/db"

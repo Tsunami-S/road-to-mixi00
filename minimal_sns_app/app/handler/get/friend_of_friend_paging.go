@@ -3,7 +3,8 @@ package get
 import (
 	"strconv"
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository/validation"
+	handle_valid "minimal_sns_app/handler/validate"
+	rep_valid "minimal_sns_app/repository/validate"
 	repo_get "minimal_sns_app/repository/get"
 	"net/http"
 )
@@ -19,13 +20,13 @@ func FriendOfFriendPaging(c echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
 	}
-	limit, page, err := validation.ParseAndValidatePagination(c)
+	limit, page, err := handle_valid.ParseAndValidatePagination(c)
 	if err != nil {
 		return err
 	}
-	exist, err := validation.UserExists(id)
+	exist, err := rep_valid.UserExists(id)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	if !exist {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})

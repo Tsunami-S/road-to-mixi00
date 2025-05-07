@@ -41,3 +41,8 @@ type FriendRequest struct {
 func (FriendRequest) TableName() string {
 	return "friend_requests"
 }
+
+type AddUserRequest struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+}

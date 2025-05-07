@@ -2,7 +2,7 @@ package get
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/handler/validation"
+	"minimal_sns_app/handler/validate"
 	repo_get "minimal_sns_app/repository/get"
 	"net/http"
 )
@@ -10,7 +10,7 @@ import (
 func PendingRequests(c echo.Context) error {
 	userID := c.QueryParam("user_id")
 
-	if valid, err := validation.IsValidUserId(userID); !valid {
+	if valid, err := validate.IsValidUserId(userID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 

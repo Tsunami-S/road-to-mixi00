@@ -2,7 +2,7 @@ package create
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/handler/validation"
+	"minimal_sns_app/handler/validate"
 	repo_create "minimal_sns_app/repository/create"
 	"net/http"
 )
@@ -12,10 +12,10 @@ func RequestFriend(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 
 	// validation
-	if valid, err := validation.IsValidUserId(user1ID); !valid {
+	if valid, err := validate.IsValidUserId(user1ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-	if valid, err := validation.IsValidUserId(user2ID); !valid {
+	if valid, err := validate.IsValidUserId(user2ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
 	if user1ID == user2ID {
@@ -25,7 +25,7 @@ func RequestFriend(c echo.Context) error {
 	// check block
 	blocked, err := repo_create.IsBlockedEachOther(user1ID, user2ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	if blocked {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot send friend request due to block"})
