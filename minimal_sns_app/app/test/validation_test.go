@@ -3,8 +3,7 @@ package test
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/handler"
-	"minimal_sns_app/repository"
+	"minimal_sns_app/repository/validation"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -34,7 +33,7 @@ func TestParseAndValidatePagination(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			limit, page, err := handler.ParseAndValidatePagination(c) // ← handler経由
+			limit, page, err := validation.ParseAndValidatePagination(c)
 			if tc.wantErr && err == nil {
 				t.Errorf("期待したエラーが返らなかった")
 			}
@@ -73,7 +72,7 @@ func TestUserExists(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			exists, err := repository.UserExists(tc.userID)
+			exists, err := validation.UserExists(tc.userID)
 			if err != nil {
 				t.Errorf("エラーが発生しました: %v", err)
 			}

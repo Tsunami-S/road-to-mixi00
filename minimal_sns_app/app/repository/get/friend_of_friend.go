@@ -1,11 +1,11 @@
-package repository
+package get
 
 import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 )
 
-func GetFriendOfFriendByIDWithPaging(id, limit, offset int) ([]model.Friend, error) {
+func GetFriendOfFriendByIDWithFilter(id int) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `
@@ -55,17 +55,14 @@ func GetFriendOfFriendByIDWithPaging(id, limit, offset int) ([]model.Friend, err
 		  UNION
 		  SELECT user2_id, user1_id FROM block_list
 	  )
-
-	LIMIT ? OFFSET ?
 	`
 
 	err := db.DB.Raw(query,
-		id, id, id, id, // direct
-		id,         // u.user_id != ?
-		id, id, id, // not already friend
-		id, id, // block list
-		limit, offset,
+		id, id, // CASE: user1_id = ? || user2_id = ?
+		id, id, // WHERE: user1_id = ? OR user2_id = ?
+		id,         // WHERE u.user_id != ?
+		id, id, id, // NOT IN: friend_link
+		id, id, // NOT IN: block_list
 	).Scan(&result).Error
-
 	return result, err
 }

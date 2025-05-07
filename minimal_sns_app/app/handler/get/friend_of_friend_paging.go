@@ -1,13 +1,14 @@
-package handler
+package get
 
 import (
-	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
-	"net/http"
 	"strconv"
+	"github.com/labstack/echo/v4"
+	"minimal_sns_app/repository/validation"
+	repo_get "minimal_sns_app/repository/get"
+	"net/http"
 )
 
-func GetFriendOfFriendList(c echo.Context) error {
+func FriendOfFriendPaging(c echo.Context) error {
 	idStr := c.QueryParam("id")
 
 	// validation
@@ -18,7 +19,11 @@ func GetFriendOfFriendList(c echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
 	}
-	exist, err := repository.UserExists(id)
+	limit, page, err := validation.ParseAndValidatePagination(c)
+	if err != nil {
+		return err
+	}
+	exist, err := validation.UserExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -26,8 +31,9 @@ func GetFriendOfFriendList(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
 	}
 
-	// get friend of friend list
-	result, err := repository.GetFriendOfFriendByIDWithFilter(id)
+	// get friend list with paging
+	offset := (page - 1) * limit
+	result, err := repo_get.GetFriendOfFriendByIDWithPaging(id, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

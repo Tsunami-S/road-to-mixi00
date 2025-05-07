@@ -1,4 +1,4 @@
-package repository
+package get
 
 import (
 	"minimal_sns_app/db"

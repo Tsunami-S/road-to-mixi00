@@ -6,7 +6,7 @@ import (
 	"strings"
 	"testing"
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/handler"
+	"minimal_sns_app/handler/get"
 )
 
 func TestGetFriendList_Scenarios(t *testing.T) {
@@ -38,7 +38,7 @@ func TestGetFriendList_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := handler.GetFriendList(c); err != nil {
+			if err := get.Friend(c); err != nil {
 				t.Fatal(err)
 			}
 
