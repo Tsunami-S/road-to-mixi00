@@ -1,7 +1,6 @@
 package main
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/configs"
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/create"
@@ -9,6 +8,8 @@ import (
 	"minimal_sns_app/handler/get_all"
 	"net/http"
 	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func main() {
@@ -25,10 +26,10 @@ func main() {
 	e.GET("/get_friend_of_friend_list_paging", get.FriendOfFriendPaging)
 
 	// bonus
-	e.GET("/add_new_user", create.AddNewUser)
-	e.GET("/block_user", create.AddBlockList)
-	e.GET("/request_friend", create.RequestFriend)
-	e.GET("/respond_friend_request", create.RespondRequest)
+	e.POST("/add_new_user", create.AddNewUser)
+	e.POST("/block_user", create.AddBlockList)
+	e.POST("/request_friend", create.RequestFriend)
+	e.POST("/respond_friend_request", create.RespondRequest)
 	e.GET("/pending_requests", get.PendingRequests)
 
 	// for debug

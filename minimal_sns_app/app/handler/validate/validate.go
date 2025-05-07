@@ -1,9 +1,10 @@
 package validate
 
 import (
-	"github.com/labstack/echo/v4"
-	"strconv"
 	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func ParseAndValidatePagination(c echo.Context) (limit int, page int, err error) {

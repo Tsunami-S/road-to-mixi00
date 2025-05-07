@@ -1,9 +1,10 @@
 package get_all
 
 import (
-	"github.com/labstack/echo/v4"
 	repo_all "minimal_sns_app/repository/get_all"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func FriendLinks(c echo.Context) error {

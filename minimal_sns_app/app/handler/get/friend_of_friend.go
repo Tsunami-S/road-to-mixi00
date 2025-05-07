@@ -1,11 +1,12 @@
 package get
 
 import (
-	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository/validate"
 	repo_get "minimal_sns_app/repository/get"
+	"minimal_sns_app/repository/validate"
 	"net/http"
 	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func FriendOfFriend(c echo.Context) error {

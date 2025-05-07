@@ -2,10 +2,11 @@ package validate
 
 import (
 	"errors"
-	"github.com/labstack/echo/v4"
 	repo_valid "minimal_sns_app/repository/validate"
-	"strconv"
 	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func IsValidUserId(id string) (bool, error) {

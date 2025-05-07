@@ -1,9 +1,10 @@
 package get_all
 
 import (
-	"github.com/labstack/echo/v4"
 	repo_all "minimal_sns_app/repository/get_all"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func BlockList(c echo.Context) error {
@@ -13,4 +14,3 @@ func BlockList(c echo.Context) error {
 	}
 	return c.JSON(http.StatusOK, blocks)
 }
-

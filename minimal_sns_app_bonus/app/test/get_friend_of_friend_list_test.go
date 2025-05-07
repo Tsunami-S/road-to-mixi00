@@ -1,13 +1,14 @@
 package test
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 )
 
 func setupTestDB_FOF(t *testing.T) {

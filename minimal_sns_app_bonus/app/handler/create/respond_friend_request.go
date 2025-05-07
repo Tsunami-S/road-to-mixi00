@@ -1,46 +1,51 @@
 package create
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/handler/validate"
+	"minimal_sns_app/model"
 	repo_create "minimal_sns_app/repository/create"
 	"net/http"
+
+	"github.com/labstack/echo/v4"
 )
 
 func RespondRequest(c echo.Context) error {
-	user1ID := c.QueryParam("user1_id")
-	user2ID := c.QueryParam("user2_id")
-	action := c.QueryParam("action")
+	var req model.RespondRequestInput
+
+	// bind json to struct
+	if err := c.Bind(&req); err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request format"})
+	}
 
 	// validation
-	if valid, err := validate.IsValidUserId(user1ID); !valid {
+	if valid, err := validate.IsValidUserId(req.User1ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-	if valid, err := validate.IsValidUserId(user2ID); !valid {
+	if valid, err := validate.IsValidUserId(req.User2ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
-	if user1ID == user2ID {
+	if req.User1ID == req.User2ID {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
 	}
-	if action != "accepted" && action != "rejected" {
+	if req.Action != "accepted" && req.Action != "rejected" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid action"})
 	}
 
 	// check & update friend request
-	req, err := repo_create.FindRequest(user1ID, user2ID)
+	request, err := repo_create.FindRequest(req.User1ID, req.User2ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "request not found or already handled"})
 	}
-	if err := repo_create.UpdateRequest(req, action); err != nil {
+	if err := repo_create.UpdateRequest(request, req.Action); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to update request"})
 	}
 
-	// create friend link if accepted
-	if action == "accepted" {
-		if err := repo_create.FriendLink(user1ID, user2ID); err != nil {
+	// add link
+	if req.Action == "accepted" {
+		if err := repo_create.FriendLink(req.User1ID, req.User2ID); err != nil {
 			return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to create friendship"})
 		}
 	}
 
-	return c.JSON(http.StatusOK, map[string]string{"message": "request " + action + "ed"})
+	return c.JSON(http.StatusOK, map[string]string{"message": "request " + req.Action + "ed"})
 }

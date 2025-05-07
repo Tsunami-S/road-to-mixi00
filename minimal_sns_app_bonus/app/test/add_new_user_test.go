@@ -1,13 +1,14 @@
 package test
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/create"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 )
 
 func setupTestDB_AddUser(t *testing.T) {
@@ -20,50 +21,43 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 
 	tests := []struct {
 		name     string
-		id       string
-		userName string
+		body     string
 		wantCode int
 		wantBody string
 	}{
 		{
 			name:     "1.ユーザー追加成功",
-			id:       "new_user_1",
-			userName: "テストユーザー",
+			body:     `{"id":"new_user_1", "name":"テストユーザー"}`,
 			wantCode: http.StatusOK,
 			wantBody: "user added",
 		},
 		{
 			name:     "2.同じIDのユーザーが既に存在する",
-			id:       "id1",
-			userName: "新しい名前",
+			body:     `{"id":"id1", "name":"新しい名前"}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "user ID already exists",
 		},
 		{
 			name:     "3.ID が空",
-			id:       "",
-			userName: "valid",
+			body:     `{"id":"", "name":"valid"}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "id must have 1 ~ 20 characters",
 		},
 		{
 			name:     "4.ID が長すぎる",
-			id:       strings.Repeat("a", 21),
-			userName: "valid",
+			body:     `{"id":"` + strings.Repeat("a", 21) + `", "name":"valid"}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "id must have 1 ~ 20 characters",
 		},
 		{
 			name:     "5.名前が空",
-			id:       "valid_id",
-			userName: "",
+			body:     `{"id":"valid_id", "name":""}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "name must have 1 ~ 64 characters",
 		},
 		{
 			name:     "6.名前が長すぎる",
-			id:       "valid_id",
-			userName: strings.Repeat("あ", 65),
+			body:     `{"id":"valid_id", "name":"` + strings.Repeat("あ", 65) + `"}`,
 			wantCode: http.StatusBadRequest,
 			wantBody: "name must have 1 ~ 64 characters",
 		},
@@ -71,8 +65,8 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			url := "/add_new_user?id=" + tc.id + "&name=" + tc.userName
-			req := httptest.NewRequest(http.MethodGet, url, nil)
+			req := httptest.NewRequest(http.MethodPost, "/add_new_user", strings.NewReader(tc.body))
+			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 

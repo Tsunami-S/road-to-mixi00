@@ -1,13 +1,14 @@
 package test
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	rep_valid "minimal_sns_app/repository/validate"
 	handle_valid "minimal_sns_app/handler/validate"
+	rep_valid "minimal_sns_app/repository/validate"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"github.com/labstack/echo/v4"
 )
 
 func TestParseAndValidatePagination(t *testing.T) {

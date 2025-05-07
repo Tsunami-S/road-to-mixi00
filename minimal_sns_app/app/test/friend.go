@@ -1,12 +1,13 @@
 package test
 
 import (
+	"minimal_sns_app/handler/get"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/handler/get"
 )
 
 func TestGetFriendList_Scenarios(t *testing.T) {

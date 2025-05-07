@@ -3,11 +3,11 @@ package test
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"os"
 	"log"
-	"time"
 	"minimal_sns_app/db"
+	"os"
 	"testing"
+	"time"
 )
 
 func InitTestDB() *gorm.DB {

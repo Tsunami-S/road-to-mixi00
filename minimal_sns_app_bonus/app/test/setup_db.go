@@ -3,8 +3,8 @@ package test
 import (
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
-	"os"
 	"log"
+	"os"
 	"time"
 )
 

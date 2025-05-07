@@ -46,3 +46,19 @@ type AddUserRequest struct {
 	ID   string `json:"id"`
 	Name string `json:"name"`
 }
+
+type BlockRequest struct {
+	User1ID string `json:"user1_id"`
+	User2ID string `json:"user2_id"`
+}
+
+type FriendRequestInput struct {
+	User1ID string `json:"user1_id"`
+	User2ID string `json:"user2_id"`
+}
+
+type RespondRequestInput struct {
+	User1ID string `json:"user1_id"`
+	User2ID string `json:"user2_id"`
+	Action  string `json:"action"` // "accepted" または "rejected"
+}

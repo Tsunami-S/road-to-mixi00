@@ -1,9 +1,10 @@
 package configs
 
 import (
-	"github.com/kelseyhightower/envconfig"
 	"log"
 	"sync"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
 var (

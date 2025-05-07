@@ -1,12 +1,13 @@
 package get
 
 import (
-	"strconv"
-	"github.com/labstack/echo/v4"
 	handle_valid "minimal_sns_app/handler/validate"
-	rep_valid "minimal_sns_app/repository/validate"
 	repo_get "minimal_sns_app/repository/get"
+	rep_valid "minimal_sns_app/repository/validate"
 	"net/http"
+	"strconv"
+
+	"github.com/labstack/echo/v4"
 )
 
 func FriendOfFriendPaging(c echo.Context) error {
