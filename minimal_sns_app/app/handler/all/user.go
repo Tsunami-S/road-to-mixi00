@@ -7,7 +7,7 @@ import (
 )
 
 func Users(c echo.Context) error {
-	users, err := repo_all.GetAllUsers()
+	users, err := repo_all.Users()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch users"})
 	}

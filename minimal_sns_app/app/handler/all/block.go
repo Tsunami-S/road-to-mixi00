@@ -7,7 +7,7 @@ import (
 )
 
 func BlockList(c echo.Context) error {
-	blocks, err := repo_all.GetAllBlockList()
+	blocks, err := repo_all.BlockList()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch block list"})
 	}

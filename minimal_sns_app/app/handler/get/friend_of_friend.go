@@ -28,7 +28,7 @@ func FriendOfFriend(c echo.Context) error {
 	}
 
 	// get friend of friend list
-	result, err := repo_get.GetFriendOfFriendByIDWithFilter(id)
+	result, err := repo_get.FriendOfFriend(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

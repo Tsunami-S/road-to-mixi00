@@ -33,7 +33,7 @@ func FriendOfFriendPaging(c echo.Context) error {
 
 	// get friend list with paging
 	offset := (page - 1) * limit
-	result, err := repo_get.GetFriendOfFriendByIDWithPaging(id, limit, offset)
+	result, err := repo_get.FriendOfFriendPaging(id, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

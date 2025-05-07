@@ -5,7 +5,7 @@ import (
 	"minimal_sns_app/model"
 )
 
-func GetFriendOfFriendByIDWithPaging(id, limit, offset int) ([]model.Friend, error) {
+func FriendOfFriendPaging(id, limit, offset int) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `

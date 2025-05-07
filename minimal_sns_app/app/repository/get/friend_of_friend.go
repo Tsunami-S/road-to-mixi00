@@ -5,7 +5,7 @@ import (
 	"minimal_sns_app/model"
 )
 
-func GetFriendOfFriendByIDWithFilter(id int) ([]model.Friend, error) {
+func FriendOfFriend(id int) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `

@@ -5,7 +5,7 @@ import (
 	"minimal_sns_app/model"
 )
 
-func GetFriendsByID(id int) ([]model.Friend, error) {
+func Friend(id int) ([]model.Friend, error) {
 	var friends []model.Friend
 	query := `
         SELECT u.user_id AS id, u.name
