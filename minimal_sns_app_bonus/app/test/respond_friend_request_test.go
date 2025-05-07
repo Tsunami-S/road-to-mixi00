@@ -3,7 +3,7 @@ package test
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/handler"
+	"minimal_sns_app/handler/create"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -93,7 +93,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := handler.RespondFriendRequest(c); err != nil {
+			if err := create.RespondRequest(c); err != nil {
 				t.Fatal(err)
 			}
 

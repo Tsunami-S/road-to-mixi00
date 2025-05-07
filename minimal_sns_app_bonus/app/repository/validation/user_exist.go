@@ -1,4 +1,4 @@
-package repository
+package validation
 
 import (
 	"gorm.io/gorm"

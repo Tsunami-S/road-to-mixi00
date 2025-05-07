@@ -1,8 +1,8 @@
-package handler
+package create
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
+	repo_create "minimal_sns_app/repository/create"
 	"net/http"
 )
 
@@ -19,7 +19,7 @@ func AddNewUser(c echo.Context) error {
 	}
 
 	// check uniqueness
-	exists, err := repository.IsUserIDExists(id)
+	exists, err := repo_create.IsUserIDExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to check user ID uniqueness"})
 	}
@@ -28,7 +28,7 @@ func AddNewUser(c echo.Context) error {
 	}
 
 	// create user
-	if err := repository.CreateUser(id, name); err != nil {
+	if err := repo_create.User(id, name); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to create user"})
 	}
 

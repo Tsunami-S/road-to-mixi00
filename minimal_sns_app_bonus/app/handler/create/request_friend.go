@@ -1,8 +1,9 @@
-package handler
+package create
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
+	"minimal_sns_app/handler/validation"
+	repo_create "minimal_sns_app/repository/create"
 	"net/http"
 )
 
@@ -11,10 +12,10 @@ func RequestFriend(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 
 	// validation
-	if valid, err := IsValidUserId(user1ID); !valid {
+	if valid, err := validation.IsValidUserId(user1ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-	if valid, err := IsValidUserId(user2ID); !valid {
+	if valid, err := validation.IsValidUserId(user2ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
 	if user1ID == user2ID {
@@ -22,7 +23,7 @@ func RequestFriend(c echo.Context) error {
 	}
 
 	// check block
-	blocked, err := repository.IsBlockedEachOther(user1ID, user2ID)
+	blocked, err := repo_create.IsBlockedEachOther(user1ID, user2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -31,7 +32,7 @@ func RequestFriend(c echo.Context) error {
 	}
 
 	// check already friends
-	alreadyFriends, err := repository.IsAlreadyFriends(user1ID, user2ID)
+	alreadyFriends, err := repo_create.IsAlreadyFriends(user1ID, user2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -40,7 +41,7 @@ func RequestFriend(c echo.Context) error {
 	}
 
 	// check reverse request
-	hasReverse, err := repository.HasPendingRequestFrom(user2ID, user1ID)
+	hasReverse, err := repo_create.HasPendingRequest(user2ID, user1ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -49,7 +50,7 @@ func RequestFriend(c echo.Context) error {
 	}
 
 	// check same direction
-	hasSent, err := repository.HasAlreadyRequested(user1ID, user2ID)
+	hasSent, err := repo_create.HasAlreadyRequested(user1ID, user2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -58,7 +59,7 @@ func RequestFriend(c echo.Context) error {
 	}
 
 	// create
-	if err := repository.CreateFriendRequest(user1ID, user2ID); err != nil {
+	if err := repo_create.Request(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to send friend request"})
 	}
 

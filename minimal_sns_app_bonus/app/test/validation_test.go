@@ -3,8 +3,8 @@ package test
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/handler"
-	"minimal_sns_app/repository"
+	"minimal_sns_app/handler/validation"
+	repo_valid "minimal_sns_app/repository/validation"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -50,7 +50,7 @@ func TestIsValidUserId(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ok, err := handler.IsValidUserId(tc.userID)
+			ok, err := validation.IsValidUserId(tc.userID)
 			if ok != tc.wantOK {
 				t.Errorf("期待結果: %v, 実際: %v", tc.wantOK, ok)
 			}
@@ -83,7 +83,7 @@ func TestUserExists(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			ok, err := repository.UserExists(tc.userID)
+			ok, err := repo_valid.UserExists(tc.userID)
 			if err != nil {
 				t.Fatalf("予期しないエラー: %v", err)
 			}
@@ -138,7 +138,7 @@ func TestParseAndValidatePagination(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			limit, page, err := handler.ParseAndValidatePagination(c)
+			limit, page, err := validation.ParseAndValidatePagination(c)
 			if tc.shouldFail {
 				if err == nil {
 					t.Errorf("エラーが期待されたが nil が返された")

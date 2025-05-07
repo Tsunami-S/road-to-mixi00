@@ -1,21 +1,22 @@
-package handler
+package get
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
+	"minimal_sns_app/handler/validation"
+	repo_get "minimal_sns_app/repository/get"
 	"net/http"
 )
 
-func GetFriendList(c echo.Context) error {
+func Friend(c echo.Context) error {
 	userID := c.QueryParam("id")
 
 	// validation
-	if valid, err := IsValidUserId(userID); !valid {
+	if valid, err := validation.IsValidUserId(userID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 
 	// get friend list
-	friends, err := repository.GetFriendsByID(userID)
+	friends, err := repo_get.Friend(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

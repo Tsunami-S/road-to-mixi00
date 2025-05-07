@@ -1,8 +1,9 @@
-package handler
+package create
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
+	"minimal_sns_app/handler/validation"
+	repo_create "minimal_sns_app/repository/create"
 	"net/http"
 )
 
@@ -11,10 +12,10 @@ func AddBlockList(c echo.Context) error {
 	user2ID := c.QueryParam("user2_id")
 
 	// validation
-	if valid, err := IsValidUserId(user1ID); !valid {
+	if valid, err := validation.IsValidUserId(user1ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
 	}
-	if valid, err := IsValidUserId(user2ID); !valid {
+	if valid, err := validation.IsValidUserId(user2ID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
 	}
 	if user1ID == user2ID {
@@ -22,7 +23,7 @@ func AddBlockList(c echo.Context) error {
 	}
 
 	// check already blocked
-	blocked, err := repository.IsBlocked(user1ID, user2ID)
+	blocked, err := repo_create.IsBlocked(user1ID, user2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -31,17 +32,17 @@ func AddBlockList(c echo.Context) error {
 	}
 
 	// remove friendship
-	if err := repository.DeleteFriendLink(user1ID, user2ID); err != nil {
+	if err := repo_create.DeleteFriendLink(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to delete friendship"})
 	}
 
 	// reject pending requests
-	if err := repository.RejectPendingRequests(user1ID, user2ID); err != nil {
+	if err := repo_create.RejectRequests(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to reject friend request"})
 	}
 
 	// add to block list
-	if err := repository.CreateBlock(user1ID, user2ID); err != nil {
+	if err := repo_create.Block(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to block user"})
 	}
 

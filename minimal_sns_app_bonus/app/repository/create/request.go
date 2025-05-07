@@ -1,4 +1,4 @@
-package repository
+package create
 
 import (
 	"minimal_sns_app/db"
@@ -35,7 +35,7 @@ func IsAlreadyFriends(user1, user2 string) (bool, error) {
 	return false, err
 }
 
-func HasPendingRequestFrom(user1, user2 string) (bool, error) {
+func HasPendingRequest(user1, user2 string) (bool, error) {
 	var req model.FriendRequest
 	err := db.DB.Where("user1_id = ? AND user2_id = ? AND status = 'pending'", user1, user2).First(&req).Error
 	if err == nil {
@@ -59,7 +59,7 @@ func HasAlreadyRequested(user1, user2 string) (bool, error) {
 	return false, err
 }
 
-func CreateFriendRequest(user1, user2 string) error {
+func Request(user1, user2 string) error {
 	req := model.FriendRequest{User1ID: user1, User2ID: user2, Status: "pending"}
 	return db.DB.Create(&req).Error
 }

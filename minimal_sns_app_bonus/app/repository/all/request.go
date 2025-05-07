@@ -1,11 +1,11 @@
-package repository
+package all
 
 import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 )
 
-func GetAllFriendRequests() ([]model.FriendRequest, error) {
+func FriendRequests() ([]model.FriendRequest, error) {
 	var requests []model.FriendRequest
 	err := db.DB.Find(&requests).Error
 	return requests, err

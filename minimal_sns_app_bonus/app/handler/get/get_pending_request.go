@@ -1,19 +1,20 @@
-package handler
+package get
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
+	"minimal_sns_app/handler/validation"
+	repo_get "minimal_sns_app/repository/get"
 	"net/http"
 )
 
-func GetPendingRequests(c echo.Context) error {
+func PendingRequests(c echo.Context) error {
 	userID := c.QueryParam("user_id")
 
-	if valid, err := IsValidUserId(userID); !valid {
+	if valid, err := validation.IsValidUserId(userID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 
-	requests, err := repository.GetPendingRequestsForUser(userID)
+	requests, err := repo_get.PendingRequest(userID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch requests"})
 	}

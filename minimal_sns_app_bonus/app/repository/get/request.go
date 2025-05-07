@@ -1,11 +1,11 @@
-package repository
+package get
 
 import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 )
 
-func GetPendingRequestsForUser(userID string) ([]model.FriendRequest, error) {
+func PendingRequest(userID string) ([]model.FriendRequest, error) {
 	var requests []model.FriendRequest
 
 	query := `

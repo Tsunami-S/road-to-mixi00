@@ -3,7 +3,7 @@ package test
 import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
-	"minimal_sns_app/handler"
+	"minimal_sns_app/handler/get"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -58,7 +58,7 @@ func TestGetPendingRequests_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			err := handler.GetPendingRequests(c)
+			err := get.PendingRequests(c)
 			if err != nil {
 				t.Fatal(err)
 			}

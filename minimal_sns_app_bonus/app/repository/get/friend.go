@@ -1,11 +1,11 @@
-package repository
+package get
 
 import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 )
 
-func GetFriendsByID(id string) ([]model.Friend, error) {
+func Friend(id string) ([]model.Friend, error) {
 	var friends []model.Friend
 	query := `
         SELECT u.user_id AS id, u.name

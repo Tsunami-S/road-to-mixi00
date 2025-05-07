@@ -2,7 +2,7 @@ package test
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/handler"
+	"minimal_sns_app/handler/get"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -63,7 +63,7 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := handler.GetFriendOfFriendListPaging(c); err != nil {
+			if err := get.FriendOfFriendPaging(c); err != nil {
 				t.Fatal(err)
 			}
 

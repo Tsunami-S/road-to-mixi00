@@ -1,9 +1,9 @@
-package handler
+package validation
 
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/repository"
+	repo_valid "minimal_sns_app/repository/validation"
 	"strconv"
 )
 
@@ -12,7 +12,7 @@ func IsValidUserId(id string) (bool, error) {
 		return false, errors.New("invalid user ID format")
 	}
 
-	exists, err := repository.UserExists(id)
+	exists, err := repo_valid.UserExists(id)
 	if err != nil {
 		return false, errors.New("DB error while checking user ID")
 	}

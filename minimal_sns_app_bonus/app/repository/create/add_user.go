@@ -1,4 +1,4 @@
-package repository
+package create
 
 import (
 	"minimal_sns_app/db"
@@ -11,7 +11,7 @@ func IsUserIDExists(id string) (bool, error) {
 	return count > 0, err
 }
 
-func CreateUser(id, name string) error {
+func User(id, name string) error {
 	user := model.User{UserID: id, Name: name}
 	return db.DB.Create(&user).Error
 }
