@@ -2,38 +2,37 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/db"
-	"minimal_sns_app/model"
+	"minimal_sns_app/repository"
 	"net/http"
 )
 
 func GetAllUsers(c echo.Context) error {
-	var users []model.User
-	if err := db.DB.Find(&users).Error; err != nil {
+	users, err := repository.GetAllUsers()
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch users"})
 	}
 	return c.JSON(http.StatusOK, users)
 }
 
 func GetAllFriendLinks(c echo.Context) error {
-	var links []model.FriendLink
-	if err := db.DB.Find(&links).Error; err != nil {
+	links, err := repository.GetAllFriendLinks()
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch friend links"})
 	}
 	return c.JSON(http.StatusOK, links)
 }
 
 func GetAllBlockList(c echo.Context) error {
-	var blocks []model.BlockList
-	if err := db.DB.Find(&blocks).Error; err != nil {
+	blocks, err := repository.GetAllBlockList()
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch block list"})
 	}
 	return c.JSON(http.StatusOK, blocks)
 }
 
 func GetAllFriendRequests(c echo.Context) error {
-	var requests []model.FriendRequest
-	if err := db.DB.Find(&requests).Error; err != nil {
+	requests, err := repository.GetAllFriendRequests()
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch friend requests"})
 	}
 	return c.JSON(http.StatusOK, requests)

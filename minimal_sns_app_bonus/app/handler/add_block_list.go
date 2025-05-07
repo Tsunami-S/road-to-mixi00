@@ -2,8 +2,7 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/db"
-	"minimal_sns_app/model"
+	"minimal_sns_app/repository"
 	"net/http"
 )
 
@@ -22,34 +21,27 @@ func AddBlockList(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot block yourself"})
 	}
 
-	// check BLOCK status
-	var existing model.BlockList
-	if err := db.DB.Where("user1_id = ? AND user2_id = ?", user1ID, user2ID).First(&existing).Error; err == nil {
+	// check already blocked
+	blocked, err := repository.IsBlocked(user1ID, user2ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+	}
+	if blocked {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "already blocked"})
 	}
 
-	// check FRIEND status
-	if err := db.DB.Where(
-		"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-		user1ID, user2ID, user2ID, user1ID,
-	).Delete(&model.FriendLink{}).Error; err != nil {
+	// remove friendship
+	if err := repository.DeleteFriendLink(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to delete friendship"})
 	}
 
-	// check REQUEST status
-	if err := db.DB.Model(&model.FriendRequest{}).
-		Where(
-			"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-			user1ID, user2ID, user2ID, user1ID,
-		).
-		Where("status = ?", "pending").
-		Update("status", "rejected").Error; err != nil {
+	// reject pending requests
+	if err := repository.RejectPendingRequests(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to reject friend request"})
 	}
 
-	// block user
-	block := model.BlockList{User1ID: user1ID, User2ID: user2ID}
-	if err := db.DB.Create(&block).Error; err != nil {
+	// add to block list
+	if err := repository.CreateBlock(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to block user"})
 	}
 

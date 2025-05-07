@@ -18,7 +18,7 @@ func GetFriendList(c echo.Context) error {
 	if err != nil || id < 0 || len(idStr) > 11 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be 0 ~ 99999999999"})
 	}
-	exist, err := UserExists(id)
+	exist, err := repository.UserExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}

@@ -4,6 +4,7 @@ import (
 	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler"
+	"minimal_sns_app/repository"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -72,7 +73,7 @@ func TestUserExists(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			exists, err := handler.UserExists(tc.userID)
+			exists, err := repository.UserExists(tc.userID)
 			if err != nil {
 				t.Errorf("エラーが発生しました: %v", err)
 			}

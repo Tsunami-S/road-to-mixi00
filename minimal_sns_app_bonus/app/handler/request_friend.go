@@ -2,8 +2,7 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/db"
-	"minimal_sns_app/model"
+	"minimal_sns_app/repository"
 	"net/http"
 )
 
@@ -22,39 +21,44 @@ func RequestFriend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot request yourself"})
 	}
 
-	// check BLOCK status
-	var block model.BlockList
-	err_block := db.DB.Where(
-		"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-		user1ID, user2ID, user2ID, user1ID,
-	).First(&block).Error
-	if err_block == nil {
+	// check block
+	blocked, err := repository.IsBlockedEachOther(user1ID, user2ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+	}
+	if blocked {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot send friend request due to block"})
 	}
 
-	// check FRIEND status
-	var friend model.FriendLink
-	err_friend := db.DB.Where(
-		"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",
-		user1ID, user2ID, user2ID, user1ID,
-	).First(&friend).Error
-	if err_friend == nil {
+	// check already friends
+	alreadyFriends, err := repository.IsAlreadyFriends(user1ID, user2ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+	}
+	if alreadyFriends {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you are already friends"})
 	}
 
-	// check APPLICATION status
-	var reverse model.FriendRequest
-	if err := db.DB.Where("user1_id = ? AND user2_id = ? AND status = 'pending'", user2ID, user1ID).First(&reverse).Error; err == nil {
+	// check reverse request
+	hasReverse, err := repository.HasPendingRequestFrom(user2ID, user1ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+	}
+	if hasReverse {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you already have a pending request from this user"})
 	}
-	var existing model.FriendRequest
-	if err := db.DB.Where("user1_id = ? AND user2_id = ?", user1ID, user2ID).First(&existing).Error; err == nil {
+
+	// check same direction
+	hasSent, err := repository.HasAlreadyRequested(user1ID, user2ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+	}
+	if hasSent {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "friend request already sent"})
 	}
 
-	// send request
-	req := model.FriendRequest{User1ID: user1ID, User2ID: user2ID, Status: "pending"}
-	if err := db.DB.Create(&req).Error; err != nil {
+	// create
+	if err := repository.CreateFriendRequest(user1ID, user2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to send friend request"})
 	}
 

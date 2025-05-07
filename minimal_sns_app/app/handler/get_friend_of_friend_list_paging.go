@@ -18,16 +18,16 @@ func GetFriendOfFriendListPaging(c echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
 	}
-	exist, err := UserExists(id)
+	limit, page, err := ParseAndValidatePagination(c)
+	if err != nil {
+		return err
+	}
+	exist, err := repository.UserExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
 	if !exist {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
-	}
-	limit, page, err := ParseAndValidatePagination(c)
-	if err != nil {
-		return err
 	}
 
 	// get friend list with paging
@@ -41,4 +41,21 @@ func GetFriendOfFriendListPaging(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusOK, result)
+}
+
+func ParseAndValidatePagination(c echo.Context) (limit int, page int, err error) {
+	limitStr := c.QueryParam("limit")
+	pageStr := c.QueryParam("page")
+
+	limit, err = strconv.Atoi(limitStr)
+	if err != nil || limit <= 0 {
+		return 0, 0, echo.NewHTTPError(400, "error: invalid limit")
+	}
+
+	page, err = strconv.Atoi(pageStr)
+	if err != nil || page <= 0 {
+		return 0, 0, echo.NewHTTPError(400, "error: invalid page")
+	}
+
+	return limit, page, nil
 }

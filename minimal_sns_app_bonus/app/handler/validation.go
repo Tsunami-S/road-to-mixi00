@@ -3,9 +3,7 @@ package handler
 import (
 	"errors"
 	"github.com/labstack/echo/v4"
-	"gorm.io/gorm"
-	"minimal_sns_app/db"
-	"minimal_sns_app/model"
+	"minimal_sns_app/repository"
 	"strconv"
 )
 
@@ -14,27 +12,14 @@ func IsValidUserId(id string) (bool, error) {
 		return false, errors.New("invalid user ID format")
 	}
 
-	var count int64
-	err := db.DB.Model(&model.User{}).Where("user_id = ?", id).Count(&count).Error
+	exists, err := repository.UserExists(id)
 	if err != nil {
 		return false, errors.New("DB error while checking user ID")
 	}
-	if count == 0 {
+	if !exists {
 		return false, errors.New("user ID not found")
 	}
 
-	return true, nil
-}
-
-func UserExists(id string) (bool, error) {
-	var user model.User
-	err := db.DB.Where("user_id = ?", id).First(&user).Error
-	if err != nil {
-		if err == gorm.ErrRecordNotFound {
-			return false, nil
-		}
-		return false, err
-	}
 	return true, nil
 }
 

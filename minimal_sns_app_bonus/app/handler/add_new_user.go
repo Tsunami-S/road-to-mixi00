@@ -2,8 +2,7 @@ package handler
 
 import (
 	"github.com/labstack/echo/v4"
-	"minimal_sns_app/db"
-	"minimal_sns_app/model"
+	"minimal_sns_app/repository"
 	"net/http"
 )
 
@@ -18,16 +17,18 @@ func AddNewUser(c echo.Context) error {
 	if name == "" || len(name) > 64 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name must have 1 ~ 64 characters"})
 	}
-	var count int64
-	if err := db.DB.Model(&model.User{}).Where("user_id = ?", id).Count(&count).Error; err != nil {
+
+	// check uniqueness
+	exists, err := repository.IsUserIDExists(id)
+	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to check user ID uniqueness"})
 	}
-	if count > 0 {
+	if exists {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user ID already exists"})
 	}
-	// add new user
-	user := model.User{UserID: id, Name: name}
-	if err := db.DB.Create(&user).Error; err != nil {
+
+	// create user
+	if err := repository.CreateUser(id, name); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to create user"})
 	}
 
