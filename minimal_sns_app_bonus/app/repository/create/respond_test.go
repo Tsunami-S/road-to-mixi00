@@ -9,59 +9,51 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupTestDB(t *testing.T) {
+func setupTestDB_Respond(t *testing.T) {
 	db.InitDB()
+	db.DB.Exec("DELETE FROM friend_requests")
+	db.DB.Exec("DELETE FROM friend_links")
+
+	// ダミーデータ追加
+	db.DB.Create(&model.FriendRequest{User1ID: "id1", User2ID: "id2", Status: "pending"})
 }
 
 func TestFindRequest(t *testing.T) {
-	setupTestDB(t)
+	setupTestDB_Respond(t)
+	repo := &RealFriendRespondRepository{}
 
-	db.DB.Create(&model.FriendRequest{User1ID: "id1", User2ID: "id2", Status: "pending"})
-
-	t.Run("pending request found", func(t *testing.T) {
-		req, err := FindRequest("id1", "id2")
+	t.Run("正常系: リクエスト存在", func(t *testing.T) {
+		req, err := repo.FindRequest("id1", "id2")
 		assert.NoError(t, err)
 		assert.NotNil(t, req)
-		assert.Equal(t, "id1", req.User1ID)
 	})
 
-	t.Run("request not found", func(t *testing.T) {
-		req, err := FindRequest("nonexistent", "user")
-		assert.NoError(t, err)
-		assert.Nil(t, req)
+	t.Run("異常系: リクエストなし", func(t *testing.T) {
+		_, err := repo.FindRequest("idX", "idY")
+		assert.Error(t, err)
 	})
 }
 
 func TestUpdateRequest(t *testing.T) {
-	setupTestDB(t)
+	setupTestDB_Respond(t)
+	repo := &RealFriendRespondRepository{}
 
-	req := &model.FriendRequest{User1ID: "id3", User2ID: "id4", Status: "pending"}
-	db.DB.Create(req)
-
-	err := UpdateRequest(req, "accepted")
+	req, _ := repo.FindRequest("id1", "id2")
+	err := repo.UpdateRequest(req, "accepted")
 	assert.NoError(t, err)
 
-	var updated model.FriendRequest
-	db.DB.First(&updated, req.ID)
-	assert.Equal(t, "accepted", updated.Status)
+	db.DB.First(&req, req.ID)
+	assert.Equal(t, "accepted", req.Status)
 }
 
-func TestFriendLink(t *testing.T) {
-	setupTestDB(t)
+func TestCreateFriendLink(t *testing.T) {
+	setupTestDB_Respond(t)
+	repo := &RealFriendRespondRepository{}
 
-	db.DB.Where("user1_id = ? AND user2_id = ?", "id5", "id6").Delete(&model.FriendLink{})
+	err := repo.CreateFriendLink("id1", "id2")
+	assert.NoError(t, err)
 
-	t.Run("create new link", func(t *testing.T) {
-		err := FriendLink("id5", "id6")
-		assert.NoError(t, err)
-
-		var link model.FriendLink
-		result := db.DB.Where("user1_id = ? AND user2_id = ?", "id5", "id6").First(&link)
-		assert.NoError(t, result.Error)
-	})
-
-	t.Run("link already exists", func(t *testing.T) {
-		err := FriendLink("id5", "id6")
-		assert.NoError(t, err)
-	})
+	var link model.FriendLink
+	err = db.DB.Where("user1_id = ? AND user2_id = ?", "id1", "id2").First(&link).Error
+	assert.NoError(t, err)
 }

@@ -5,24 +5,31 @@ import (
 
 	"gorm.io/gorm"
 	"minimal_sns_app/db"
-	"minimal_sns_app/interfaces"
 	"minimal_sns_app/model"
 )
 
-type RespondHandler struct {
-	Validator interfaces.Validator
-	Repo      interfaces.FriendRequestRepository
+type RealFriendRespondRepository struct{}
+
+func (r *RealFriendRespondRepository) RespondRequest(fromID, toID, action string) error {
+	return db.DB.Model(&model.FriendRequest{}).
+		Where("user1_id = ? AND user2_id = ?", fromID, toID).
+		Update("status", action).Error
 }
 
-func NewRespondRequestHandler(v interfaces.Validator, r interfaces.FriendRequestRepository) *RespondHandler {
-	return &RespondHandler{Validator: v, Repo: r}
+func (r *RealFriendRespondRepository) FindRequest(user1, user2 string) (*model.FriendRequest, error) {
+	var req model.FriendRequest
+	err := db.DB.Where("user1_id = ? AND user2_id = ? AND status = 'pending'", user1, user2).First(&req).Error
+	if errors.Is(err, gorm.ErrRecordNotFound) {
+		return nil, errors.New("request not found or already handled")
+	}
+	return &req, err
 }
 
-func (r *RealFriendRequestRepository) UpdateRequest(req *model.FriendRequest, status string) error {
+func (r *RealFriendRespondRepository) UpdateRequest(req *model.FriendRequest, status string) error {
 	return db.DB.Model(req).Update("status", status).Error
 }
 
-func (r *RealFriendRequestRepository) FriendLink(user1, user2 string) error {
+func (r *RealFriendRespondRepository) CreateFriendLink(user1, user2 string) error {
 	var existing model.FriendLink
 	err := db.DB.Where(
 		"(user1_id = ? AND user2_id = ?) OR (user1_id = ? AND user2_id = ?)",

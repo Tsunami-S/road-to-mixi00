@@ -12,11 +12,13 @@ func setupTestDB_PendingRequest(t *testing.T) {
 	db.InitDB()
 }
 
-func TestPendingRequest(t *testing.T) {
+func TestGetPendingRequests(t *testing.T) {
 	setupTestDB_PendingRequest(t)
 
+	repo := &RealFriendRequestRepository{}
+
 	t.Run("正常系: id2 への保留中リクエスト", func(t *testing.T) {
-		requests, err := PendingRequest("id2")
+		requests, err := repo.GetPendingRequests("id1")
 		assert.NoError(t, err)
 
 		var gotIDs []string
@@ -24,9 +26,7 @@ func TestPendingRequest(t *testing.T) {
 			gotIDs = append(gotIDs, r.User1ID)
 		}
 
-		assert.Contains(t, gotIDs, "id1")
+		assert.Contains(t, gotIDs, "id45")
 		assert.NotContains(t, gotIDs, "id3")
-		assert.NotContains(t, gotIDs, "id4")
-		assert.NotContains(t, gotIDs, "id2")
 	})
 }

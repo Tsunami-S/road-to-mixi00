@@ -29,7 +29,7 @@ func (v *RealValidator) UserExists(id string) (bool, error) {
 		return false, errors.New("DB error while checking user ID")
 	}
 	if !exists {
-		return false, errors.New("user ID not found")
+		return false, errors.New("user not found")
 	}
 	return true, nil
 }

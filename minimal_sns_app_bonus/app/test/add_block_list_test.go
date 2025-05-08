@@ -60,13 +60,13 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 			name:     "5.存在しない user1_id",
 			body:     `{"user1_id":"invalid_id", "user2_id":"id2"}`,
 			wantCode: http.StatusBadRequest,
-			wantBody: "invalid user1_id",
+			wantBody: "user not found",
 		},
 		{
 			name:     "6.存在しない user2_id",
 			body:     `{"user1_id":"id2", "user2_id":"invalid_id"}`,
 			wantCode: http.StatusBadRequest,
-			wantBody: "invalid user2_id",
+			wantBody: "user not found",
 		},
 	}
 

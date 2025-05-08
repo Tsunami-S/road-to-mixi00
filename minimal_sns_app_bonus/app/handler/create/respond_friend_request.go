@@ -37,6 +37,26 @@ func (h *FriendRespondHandler) RespondRequest(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid action"})
 	}
 
+	exists, err := h.Validator.UserExists(req.User1ID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	if !exists {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: user ID not found"})
+	}
+
+	exists, err = h.Validator.UserExists(req.User2ID)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
+	}
+	if !exists {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: user ID not found"})
+	}
+
+	if req.User1ID == req.User2ID {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot request yourself"})
+	}
+
 	request, err := h.Repo.FindRequest(req.User1ID, req.User2ID)
 	if err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "request not found or already handled"})

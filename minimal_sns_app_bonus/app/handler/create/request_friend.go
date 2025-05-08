@@ -29,7 +29,7 @@ func (h *RequestFriendHandler) RequestFriend(c echo.Context) error {
 
 	exists, err := h.Validator.UserExists(req.User1ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if !exists {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: user ID not found"})
@@ -37,7 +37,7 @@ func (h *RequestFriendHandler) RequestFriend(c echo.Context) error {
 
 	exists, err = h.Validator.UserExists(req.User2ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if !exists {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: user ID not found"})

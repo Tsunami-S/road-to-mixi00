@@ -34,15 +34,15 @@ func (h *BlockHandler) AddBlockList(c echo.Context) error {
 	}
 
 	if exist, err := h.Validator.UserExists(req.User1ID); err != nil || !exist {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user1_id"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if exist, err := h.Validator.UserExists(req.User2ID); err != nil || !exist {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user2_id"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
 	blocked, err := h.Repo.IsBlocked(req.User1ID, req.User2ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if blocked {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "already blocked"})

@@ -9,7 +9,6 @@ import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/create"
 	"minimal_sns_app/handler/validate"
-	"minimal_sns_app/interfaces"
 	repo_create "minimal_sns_app/repository/create"
 
 	"github.com/labstack/echo/v4"
@@ -23,9 +22,9 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 	setupTestDB_Respond(t)
 	e := echo.New()
 
-	handler := create.NewRespondFriendRequestHandler(
+	handler := create.NewFriendRespondHandler(
 		&validate.RealValidator{},
-		&repo_create.RealFriendRequestManager{},
+		&repo_create.RealFriendRespondRepository{},
 	)
 
 	tests := []struct {
@@ -39,8 +38,8 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 		{"3.自分自身に応答", `{"user1_id":"id1", "user2_id":"id1", "action":"accepted"}`, http.StatusBadRequest, "invalid user IDs"},
 		{"4.存在しない申請", `{"user1_id":"id3", "user2_id":"id4", "action":"accepted"}`, http.StatusBadRequest, "request not found"},
 		{"5.不正なアクション", `{"user1_id":"id45", "user2_id":"id1", "action":"maybe"}`, http.StatusBadRequest, "invalid action"},
-		{"6.無効な user1_id", `{"user1_id":"invalid", "user2_id":"id1", "action":"accepted"}`, http.StatusBadRequest, "user1_id: user ID not found"},
-		{"7.無効な user2_id", `{"user1_id":"id1", "user2_id":"invalid", "action":"accepted"}`, http.StatusBadRequest, "user2_id: user ID not found"},
+		{"6.無効な user1_id", `{"user1_id":"invalid", "user2_id":"id1", "action":"accepted"}`, http.StatusBadRequest, "user not found"},
+		{"7.無効な user2_id", `{"user1_id":"id1", "user2_id":"invalid", "action":"accepted"}`, http.StatusBadRequest, "user not found"},
 	}
 
 	for _, tc := range tests {

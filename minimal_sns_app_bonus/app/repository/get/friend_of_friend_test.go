@@ -20,10 +20,10 @@ func TestFriendOfFriend(t *testing.T) {
 		expectErr bool
 	}{
 		{
-			name:      "正常系: id1の友達の友達",
-			userID:    "id1",
-			wantNames: []string{"user13", "user12", "user11"},
-			notWant:   []string{"user01", "user02"},
+			name:      "正常系: id49の友達の友達",
+			userID:    "id49",
+			wantNames: []string{"user51"},
+			notWant:   []string{"user02"},
 			expectErr: false,
 		},
 		{

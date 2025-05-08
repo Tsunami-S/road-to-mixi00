@@ -3,31 +3,53 @@ package get
 import (
 	"testing"
 
-	"minimal_sns_app/db"
-
 	"github.com/stretchr/testify/assert"
+	"minimal_sns_app/db"
 )
 
-func setupTestDB_Friend(t *testing.T) {
+func setupTestDB_FriendRepo(t *testing.T) {
 	db.InitDB()
 }
 
-func TestFriend(t *testing.T) {
-	setupTestDB_Friend(t)
+func TestFriendRepository_Friend(t *testing.T) {
+	setupTestDB_FriendRepo(t)
 	repo := &RealFriendRepository{}
 
-	t.Run("正常系: id1 の友達取得", func(t *testing.T) {
-		friends, err := repo.GetFriends("id1")
-		assert.NoError(t, err)
+	tests := []struct {
+		name       string
+		userID     string
+		shouldHave []string // 期待されるフレンドのID
+		shouldNot  []string // 除外されるべきID（ブロックなど）
+	}{
+		{
+			name:       "正常系: id31 の友達取得",
+			userID:     "id31",
+			shouldHave: []string{"id5"},
+			shouldNot:  []string{"id7"},
+		},
+		{
+			name:       "存在しないユーザー",
+			userID:     "invalid_id",
+			shouldHave: []string{},
+		},
+	}
 
-		gotIDs := map[string]bool{}
-		for _, f := range friends {
-			gotIDs[f.ID] = true
-		}
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			friends, err := repo.GetFriends(tc.userID)
+			assert.NoError(t, err)
 
-		assert.True(t, gotIDs["id2"], "id2 は含まれるべき")
-		assert.True(t, gotIDs["id3"], "id3 は含まれるべき")
-		assert.False(t, gotIDs["id4"], "id4 はブロックしているため除外されるべき")
-		assert.False(t, gotIDs["id5"], "id5 からブロックされているため除外されるべき")
-	})
+			gotIDs := map[string]bool{}
+			for _, f := range friends {
+				gotIDs[f.ID] = true
+			}
+
+			for _, id := range tc.shouldHave {
+				assert.True(t, gotIDs[id], id+" は含まれるべき")
+			}
+			for _, id := range tc.shouldNot {
+				assert.False(t, gotIDs[id], id+" は除外されるべき")
+			}
+		})
+	}
 }

@@ -10,7 +10,6 @@ import (
 
 	repo_create "minimal_sns_app/repository/create"
 	repo_get "minimal_sns_app/repository/get"
-	repo_validate "minimal_sns_app/repository/validate"
 
 	"minimal_sns_app/handler/validate"
 
@@ -32,10 +31,13 @@ func main() {
 	fofPagingHandler := get.NewFriendOfFriendPagingHandler(validator, paginationValidator, &repo_get.RealFriendOfFriendPagingRepository{})
 	pendingHandler := get.NewPendingRequestHandler(validator, &repo_get.RealFriendRequestRepository{})
 
-	addUserHandler := create.NewAddUserHandler(&repo_create.RealUserRepository{})
+	addUserHandler := create.NewUserHandler(&repo_create.RealUserRepository{})
 	blockHandler := create.NewBlockHandler(validator, &repo_create.RealBlockRepository{})
-	requestHandler := create.NewRequestHandler(validator, &repo_create.RealFriendRequestRepository{})
-	respondHandler := create.NewRespondRequestHandler(validator, &repo_create.RealFriendRequestRepository{})
+	requestHandler := create.NewRequestFriendHandler(validator, &repo_create.RealFriendRequestRepository{})
+	respondHandler := create.NewFriendRespondHandler(
+		validator,
+		&repo_create.RealFriendRespondRepository{},
+	)
 
 	// ex00
 	e.GET("/get_friend_list", friendHandler.Friend)
@@ -71,6 +73,5 @@ func main() {
 		c.JSON(code, map[string]string{"error": "invalid endpoint"})
 	}
 
-	// サーバ起動
 	e.Logger.Fatal(e.Start(":" + strconv.Itoa(conf.Server.Port)))
 }

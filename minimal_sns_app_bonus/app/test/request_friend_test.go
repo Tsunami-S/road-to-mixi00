@@ -24,7 +24,7 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 
 	handler := create.NewRequestFriendHandler(
 		&validate.RealValidator{},
-		&repo_create.RealFriendRequestManager{},
+		&repo_create.RealFriendRequestRepository{},
 	)
 
 	tests := []struct {
@@ -41,8 +41,8 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 		{"6.すでにフレンド(相手から)", `{"user1_id":"id1","user2_id":"id4"}`, http.StatusBadRequest, "you are already friends"},
 		{"7.逆方向にpendingな申請がある", `{"user1_id":"id41","user2_id":"id1"}`, http.StatusBadRequest, "you already have a pending request from this user"},
 		{"8.同じ方向の申請がすでにある", `{"user1_id":"id1","user2_id":"id27"}`, http.StatusBadRequest, "friend request already sent"},
-		{"9.存在しない user1_id", `{"user1_id":"invalid_user","user2_id":"id2"}`, http.StatusBadRequest, "user1_id: user ID not found"},
-		{"10.存在しない user2_id", `{"user1_id":"id2","user2_id":"invalid_user"}`, http.StatusBadRequest, "user2_id: user ID not found"},
+		{"9.存在しない user1_id", `{"user1_id":"invalid_user","user2_id":"id2"}`, http.StatusBadRequest, "user not found"},
+		{"10.存在しない user2_id", `{"user1_id":"id2","user2_id":"invalid_user"}`, http.StatusBadRequest, "user not found"},
 	}
 
 	for _, tc := range tests {

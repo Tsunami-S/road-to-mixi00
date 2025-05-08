@@ -9,7 +9,6 @@ import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
 	"minimal_sns_app/handler/validate"
-	"minimal_sns_app/interfaces"
 	repo_get "minimal_sns_app/repository/get"
 
 	"github.com/labstack/echo/v4"
@@ -75,7 +74,7 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 			name:     "7.存在しないID",
 			userID:   "invalid_id",
 			wantCode: http.StatusBadRequest,
-			wantBody: "user ID not found",
+			wantBody: "user not found",
 		},
 		{
 			name:     "8.友達もブロックもないユーザー",

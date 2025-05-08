@@ -37,7 +37,7 @@ func (h *UserHandler) AddNewUser(c echo.Context) error {
 	// check if ID already exists
 	exists, err := h.Repo.IsUserIDExists(req.ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to check user ID uniqueness"})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if exists {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user ID already exists"})

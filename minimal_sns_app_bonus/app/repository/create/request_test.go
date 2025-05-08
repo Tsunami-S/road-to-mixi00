@@ -9,78 +9,71 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func setupFriendStatusTestDB(t *testing.T) {
+func setupTestDB_FriendRequestRepo(t *testing.T) {
 	db.InitDB()
+	db.DB.Exec("DELETE FROM friend_requests")
+	db.DB.Exec("DELETE FROM friend_links")
+	db.DB.Exec("DELETE FROM block_lists")
+	db.DB.Exec("DELETE FROM users")
+
+	db.DB.Create(&model.User{UserID: "id1", Name: "User 1"})
+	db.DB.Create(&model.User{UserID: "id2", Name: "User 2"})
+	db.DB.Create(&model.User{UserID: "id3", Name: "User 3"})
+	db.DB.Create(&model.User{UserID: "id4", Name: "User 4"})
+
+	db.DB.Create(&model.FriendLink{User1ID: "id1", User2ID: "id2"})
+	db.DB.Create(&model.BlockList{User1ID: "id3", User2ID: "id1"})
+	db.DB.Create(&model.FriendRequest{User1ID: "id1", User2ID: "id4", Status: "pending"})
 }
 
-func TestFriendStatusFunctions(t *testing.T) {
-	setupFriendStatusTestDB(t)
+func TestRealFriendRequestRepository_IsBlockedEachOther(t *testing.T) {
+	setupTestDB_FriendRequestRepo(t)
+	repo := &RealFriendRequestRepository{}
 
-	t.Run("IsBlockedEachOther returns true when blocked", func(t *testing.T) {
-		ok, err := IsBlockedEachOther("id1", "id39")
-		assert.NoError(t, err)
-		assert.True(t, ok)
-	})
+	blocked, err := repo.IsBlockedEachOther("id20", "id1")
+	assert.NoError(t, err)
+	assert.True(t, blocked)
 
-	t.Run("IsBlockedEachOther returns false when not blocked", func(t *testing.T) {
-		ok, err := IsBlockedEachOther("id1", "id5")
-		assert.NoError(t, err)
-		assert.False(t, ok)
-	})
-
-	t.Run("IsAlreadyFriends returns true when friends", func(t *testing.T) {
-		ok, err := IsAlreadyFriends("id1", "id2")
-		assert.NoError(t, err)
-		assert.True(t, ok)
-	})
-
-	t.Run("IsAlreadyFriends returns false when not friends", func(t *testing.T) {
-		ok, err := IsAlreadyFriends("id1", "id44")
-		assert.NoError(t, err)
-		assert.False(t, ok)
-	})
-
-	t.Run("HasPendingRequest returns true when pending exists", func(t *testing.T) {
-		ok, err := HasPendingRequest("id1", "id41")
-		assert.NoError(t, err)
-		assert.True(t, ok)
-	})
-
-	t.Run("HasPendingRequest returns false when no pending", func(t *testing.T) {
-		ok, err := HasPendingRequest("id1", "id44")
-		assert.NoError(t, err)
-		assert.False(t, ok)
-	})
+	notBlocked, err := repo.IsBlockedEachOther("id1", "id2")
+	assert.NoError(t, err)
+	assert.False(t, notBlocked)
 }
 
-func TestHasAlreadyRequested(t *testing.T) {
-	setupFriendStatusTestDB(t)
+func TestRealFriendRequestRepository_IsAlreadyFriends(t *testing.T) {
+	setupTestDB_FriendRequestRepo(t)
+	repo := &RealFriendRequestRepository{}
 
-	t.Run("正常系: 既にリクエストあり", func(t *testing.T) {
-		_ = db.DB.Create(&model.FriendRequest{User1ID: "id1", User2ID: "id2", Status: "pending"}).Error
+	isFriend, err := repo.IsAlreadyFriends("id1", "id2")
+	assert.NoError(t, err)
+	assert.True(t, isFriend)
 
-		found, err := HasAlreadyRequested("id1", "id2")
-		assert.NoError(t, err)
-		assert.True(t, found)
-	})
-
-	t.Run("異常系: リクエストが存在しない", func(t *testing.T) {
-		found, err := HasAlreadyRequested("no_user1", "no_user2")
-		assert.NoError(t, err)
-		assert.False(t, found)
-	})
+	notFriend, err := repo.IsAlreadyFriends("id1", "id40")
+	assert.NoError(t, err)
+	assert.False(t, notFriend)
 }
 
-func TestRequest(t *testing.T) {
-	setupFriendStatusTestDB(t)
+func TestRealFriendRequestRepository_HasPendingRequest(t *testing.T) {
+	setupTestDB_FriendRequestRepo(t)
+	repo := &RealFriendRequestRepository{}
 
-	t.Run("正常系: 新しいリクエストを作成", func(t *testing.T) {
-		err := Request("id3", "id4")
-		assert.NoError(t, err)
+	hasPending, err := repo.HasPendingRequest("id1", "id4")
+	assert.NoError(t, err)
+	assert.True(t, hasPending)
 
-		var req model.FriendRequest
-		err = db.DB.Where("user1_id = ? AND user2_id = ?", "id3", "id4").First(&req).Error
-		assert.NoError(t, err)
-		assert.Equal(t, "pending", req.Status)
-	})
+	noPending, err := repo.HasPendingRequest("id2", "id4")
+	assert.NoError(t, err)
+	assert.False(t, noPending)
+}
+
+func TestRealFriendRequestRepository_Request(t *testing.T) {
+	setupTestDB_FriendRequestRepo(t)
+	repo := &RealFriendRequestRepository{}
+
+	err := repo.Request("id2", "id3")
+	assert.NoError(t, err)
+
+	var req model.FriendRequest
+	err = db.DB.Where("user1_id = ? AND user2_id = ?", "id2", "id3").First(&req).Error
+	assert.NoError(t, err)
+	assert.Equal(t, "pending", req.Status)
 }

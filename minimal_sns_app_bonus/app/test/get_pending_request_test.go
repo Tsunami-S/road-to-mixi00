@@ -9,7 +9,6 @@ import (
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
 	"minimal_sns_app/handler/validate"
-	"minimal_sns_app/interfaces"
 	repo_get "minimal_sns_app/repository/get"
 
 	"github.com/labstack/echo/v4"
@@ -57,7 +56,7 @@ func TestGetPendingRequests_Scenarios(t *testing.T) {
 			name:     "4.無効な ID",
 			userID:   "invalid_id",
 			wantCode: http.StatusBadRequest,
-			wantBody: "user ID not found",
+			wantBody: "user not found",
 		},
 	}
 

@@ -21,7 +21,7 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 	setupTestDB_AddUser(t)
 	e := echo.New()
 
-	handler := create.NewAddUserHandler(&repo_create.RealUserRepository{})
+	handler := create.NewUserHandler(&repo_create.RealUserRepository{})
 
 	tests := []struct {
 		name     string

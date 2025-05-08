@@ -29,7 +29,7 @@ func (h *FriendOfFriendPagingHandler) FriendOfFriendPaging(c echo.Context) error
 
 	exists, err := h.Validator.UserExists(userID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 	if !exists {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})

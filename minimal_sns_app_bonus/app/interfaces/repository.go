@@ -38,8 +38,6 @@ type FriendRequestRepository interface {
 	HasPendingRequest(fromID, toID string) (bool, error)
 	HasAlreadyRequested(fromID, toID string) (bool, error)
 	Request(fromID, toID string) error
-	SendRequest(fromID, toID string) error
-	RespondRequest(fromID, toID, action string) error
 	GetPendingRequests(userID string) ([]model.FriendRequest, error)
 }
 
@@ -47,6 +45,7 @@ type FriendRespondRepository interface {
 	FindRequest(user1ID, user2ID string) (*model.FriendRequest, error)
 	UpdateRequest(req *model.FriendRequest, action string) error
 	CreateFriendLink(user1ID, user2ID string) error
+	RespondRequest(fromID, toID, action string) error
 }
 
 type RealBlockRepository struct{}
