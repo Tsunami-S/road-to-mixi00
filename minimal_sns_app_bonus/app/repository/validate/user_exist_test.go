@@ -12,8 +12,6 @@ import (
 func setupTestDB_UserExists(t *testing.T) {
 	db.InitDB()
 
-	db.DB.Exec("DELETE FROM users")
-
 	db.DB.Create(&model.User{UserID: "exist_user", Name: "テストユーザー"})
 }
 

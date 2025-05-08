@@ -57,17 +57,17 @@ func (m *FriendOfFriendPagingRepo) GetFriendOfFriendByIDWithPaging(id string, li
 
 // FriendRequestRepo モック
 type FriendRequestRepo struct {
-	Requests             []model.FriendRequest
-	Err                  error
-	HasRequestedResult   bool
-	HasRequestedErr      error
-	RequestResult        error
-	IsBlockedResult      bool
-	IsBlockedErr         error
-	IsAlreadyFriends     bool
-	IsAlreadyFriendsErr  error
-	HasReverseRequest    bool
-	HasReverseRequestErr error
+	Requests              []model.FriendRequest
+	Err                   error
+	HasRequestedResult    bool
+	HasRequestedErr       error
+	RequestResult         error
+	IsBlockedResult       bool
+	IsBlockedErr          error
+	IsAlreadyFriendsValue bool
+	IsAlreadyFriendsErr   error
+	HasReverseRequest     bool
+	HasReverseRequestErr  error
 }
 
 func (m *FriendRequestRepo) GetPendingRequests(userID string) ([]model.FriendRequest, error) {
@@ -87,7 +87,7 @@ func (m *FriendRequestRepo) IsBlockedEachOther(user1, user2 string) (bool, error
 }
 
 func (m *FriendRequestRepo) IsAlreadyFriends(user1, user2 string) (bool, error) {
-	return m.IsAlreadyFriends, m.IsAlreadyFriendsErr
+	return m.IsAlreadyFriendsValue, m.IsAlreadyFriendsErr
 }
 
 func (m *FriendRequestRepo) HasPendingRequest(user1, user2 string) (bool, error) {

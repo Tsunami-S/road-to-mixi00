@@ -11,7 +11,6 @@ import (
 
 func setupTestDB(t *testing.T) {
 	db.InitDB()
-	db.DB.Exec("DELETE FROM users")
 }
 
 func TestIsUserIDExists(t *testing.T) {

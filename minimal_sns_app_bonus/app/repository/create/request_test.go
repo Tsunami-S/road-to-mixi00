@@ -11,30 +11,17 @@ import (
 
 func setupTestDB_FriendRequestRepo(t *testing.T) {
 	db.InitDB()
-	db.DB.Exec("DELETE FROM friend_requests")
-	db.DB.Exec("DELETE FROM friend_links")
-	db.DB.Exec("DELETE FROM block_lists")
-	db.DB.Exec("DELETE FROM users")
-
-	db.DB.Create(&model.User{UserID: "id1", Name: "User 1"})
-	db.DB.Create(&model.User{UserID: "id2", Name: "User 2"})
-	db.DB.Create(&model.User{UserID: "id3", Name: "User 3"})
-	db.DB.Create(&model.User{UserID: "id4", Name: "User 4"})
-
-	db.DB.Create(&model.FriendLink{User1ID: "id1", User2ID: "id2"})
-	db.DB.Create(&model.BlockList{User1ID: "id3", User2ID: "id1"})
-	db.DB.Create(&model.FriendRequest{User1ID: "id1", User2ID: "id4", Status: "pending"})
 }
 
 func TestRealFriendRequestRepository_IsBlockedEachOther(t *testing.T) {
 	setupTestDB_FriendRequestRepo(t)
 	repo := &RealFriendRequestRepository{}
 
-	blocked, err := repo.IsBlockedEachOther("id20", "id1")
+	blocked, err := repo.IsBlockedEachOther("id1", "id39")
 	assert.NoError(t, err)
 	assert.True(t, blocked)
 
-	notBlocked, err := repo.IsBlockedEachOther("id1", "id2")
+	notBlocked, err := repo.IsBlockedEachOther("id46", "id49")
 	assert.NoError(t, err)
 	assert.False(t, notBlocked)
 }
@@ -43,11 +30,13 @@ func TestRealFriendRequestRepository_IsAlreadyFriends(t *testing.T) {
 	setupTestDB_FriendRequestRepo(t)
 	repo := &RealFriendRequestRepository{}
 
+	// フレンド関係あり（例：id1 - id2）
 	isFriend, err := repo.IsAlreadyFriends("id1", "id2")
 	assert.NoError(t, err)
 	assert.True(t, isFriend)
 
-	notFriend, err := repo.IsAlreadyFriends("id1", "id40")
+	// フレンド関係なし（例：id1 - id5）
+	notFriend, err := repo.IsAlreadyFriends("id1", "id49")
 	assert.NoError(t, err)
 	assert.False(t, notFriend)
 }
@@ -56,10 +45,12 @@ func TestRealFriendRequestRepository_HasPendingRequest(t *testing.T) {
 	setupTestDB_FriendRequestRepo(t)
 	repo := &RealFriendRequestRepository{}
 
-	hasPending, err := repo.HasPendingRequest("id1", "id4")
+	// pendingリクエストあり（例：id1 → id41）
+	hasPending, err := repo.HasPendingRequest("id1", "id41")
 	assert.NoError(t, err)
 	assert.True(t, hasPending)
 
+	// pendingリクエストなし（例：id2 → id4）
 	noPending, err := repo.HasPendingRequest("id2", "id4")
 	assert.NoError(t, err)
 	assert.False(t, noPending)
@@ -69,11 +60,46 @@ func TestRealFriendRequestRepository_Request(t *testing.T) {
 	setupTestDB_FriendRequestRepo(t)
 	repo := &RealFriendRequestRepository{}
 
-	err := repo.Request("id2", "id3")
+	// 新規リクエスト挿入（例：id10 → id13）
+	err := repo.Request("id10", "id13")
 	assert.NoError(t, err)
 
-	var req model.FriendRequest
-	err = db.DB.Where("user1_id = ? AND user2_id = ?", "id2", "id3").First(&req).Error
+	// 検証
+	var reqExist bool
+	err = db.DB.Model(&model.FriendRequest{}).
+		Select("count(*) > 0").
+		Where("user1_id = ? AND user2_id = ? AND status = ?", "id10", "id13", "pending").
+		Find(&reqExist).Error
 	assert.NoError(t, err)
-	assert.Equal(t, "pending", req.Status)
+	assert.True(t, reqExist)
+}
+
+func TestRealFriendRequestRepository_HasAlreadyRequested(t *testing.T) {
+	setupTestDB_FriendRequestRepo(t)
+	repo := &RealFriendRequestRepository{}
+
+	// すでにリクエスト済み（例：id1 → id41）
+	hasRequested, err := repo.HasAlreadyRequested("id1", "id41")
+	assert.NoError(t, err)
+	assert.True(t, hasRequested)
+
+	// リクエストしていない（例：id2 → id3）
+	notRequested, err := repo.HasAlreadyRequested("id2", "id3")
+	assert.NoError(t, err)
+	assert.False(t, notRequested)
+}
+
+func TestRealFriendRequestRepository_GetPendingRequests(t *testing.T) {
+	setupTestDB_FriendRequestRepo(t)
+	repo := &RealFriendRequestRepository{}
+
+	// 受け取ったpendingリクエストがある（例：id27）
+	reqs, err := repo.GetPendingRequests("id27")
+	assert.NoError(t, err)
+	assert.Greater(t, len(reqs), 0)
+
+	// 受け取っていないユーザー（例：id2）
+	reqs, err = repo.GetPendingRequests("id2")
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(reqs))
 }

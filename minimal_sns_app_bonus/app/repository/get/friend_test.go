@@ -18,12 +18,12 @@ func TestFriendRepository_Friend(t *testing.T) {
 	tests := []struct {
 		name       string
 		userID     string
-		shouldHave []string // 期待されるフレンドのID
-		shouldNot  []string // 除外されるべきID（ブロックなど）
+		shouldHave []string
+		shouldNot  []string
 	}{
 		{
-			name:       "正常系: id31 の友達取得",
-			userID:     "id31",
+			name:       "正常系: id32 の友達取得",
+			userID:     "id32",
 			shouldHave: []string{"id5"},
 			shouldNot:  []string{"id7"},
 		},

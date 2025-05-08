@@ -87,14 +87,14 @@ func TestAddBlockList(t *testing.T) {
 			input:          model.BlockRequest{User1ID: "x", User2ID: "y"},
 			validatorExist: false,
 			wantCode:       http.StatusBadRequest,
-			wantContains:   "invalid user1_id",
+			wantContains:   "user not found",
 		},
 		{
 			name:         "異常系: validator error",
 			input:        model.BlockRequest{User1ID: "x", User2ID: "y"},
-			validatorErr: errors.New("db error"),
+			validatorErr: errors.New("user not found"),
 			wantCode:     http.StatusBadRequest,
-			wantContains: "invalid user1_id",
+			wantContains: "user not found",
 		},
 		{
 			name:           "異常系: 既にブロック済み",

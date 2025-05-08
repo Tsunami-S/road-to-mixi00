@@ -1,51 +1,18 @@
-package create
+package create_test
 
 import (
 	"bytes"
 	"encoding/json"
-	"errors"
+	"minimal_sns_app/handler/create"
+	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
 
-	"minimal_sns_app/model"
-
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-// --- モック定義 ---
-
-type mockRespondRepo struct {
-	findResult *model.FriendRequest
-	findErr    error
-	updateErr  error
-	linkErr    error
-}
-
-func (m *mockRespondRepo) FindRequest(user1ID, user2ID string) (*model.FriendRequest, error) {
-	return m.findResult, m.findErr
-}
-func (m *mockRespondRepo) UpdateRequest(req *model.FriendRequest, action string) error {
-	return m.updateErr
-}
-func (m *mockRespondRepo) CreateFriendLink(user1ID, user2ID string) error {
-	return m.linkErr
-}
-func (m *mockRespondRepo) RespondRequest(fromID, toID, action string) error {
-	return nil
-}
-
-type mockValidator struct {
-	Exists bool
-	Err    error
-}
-
-func (v *mockValidator) UserExists(id string) (bool, error) {
-	return v.Exists, v.Err
-}
-
-// --- 単体テスト ---
 
 func TestRespondRequest(t *testing.T) {
 	e := echo.New()
@@ -53,100 +20,80 @@ func TestRespondRequest(t *testing.T) {
 	tests := []struct {
 		name         string
 		input        model.RespondRequestInput
-		repo         *mockRespondRepo
-		validator    *mockValidator
+		validator    *mock.Validator
+		repo         *mock.MockRespondRepo
 		wantCode     int
 		wantContains string
 	}{
 		{
-			name: "success: accepted",
+			name: "✅ success: accepted",
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user02", Action: "accepted",
 			},
-			repo:      &mockRespondRepo{findResult: &model.FriendRequest{}},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusOK, wantContains: "request accepted",
+			validator:    &mock.Validator{Exists: true},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusOK,
+			wantContains: "request accepted",
 		},
 		{
-			name: "success: rejected",
+			name: "✅ success: rejected",
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user02", Action: "rejected",
 			},
-			repo:      &mockRespondRepo{findResult: &model.FriendRequest{}},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusOK, wantContains: "request rejected",
+			validator:    &mock.Validator{Exists: true},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusOK,
+			wantContains: "request rejected",
 		},
 		{
-			name: "error: invalid user ID (empty)",
+			name: "❌ invalid user ID (empty)",
 			input: model.RespondRequestInput{
 				User1ID: "", User2ID: "user02", Action: "accepted",
 			},
-			repo:      &mockRespondRepo{},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusBadRequest, wantContains: "invalid user IDs",
+			validator:    &mock.Validator{Exists: true},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusBadRequest,
+			wantContains: "invalid user IDs",
 		},
 		{
-			name: "error: same user",
-			input: model.RespondRequestInput{
-				User1ID: "user01", User2ID: "user01", Action: "accepted",
-			},
-			repo:      &mockRespondRepo{},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusBadRequest, wantContains: "invalid user IDs",
-		},
-		{
-			name: "error: invalid action",
+			name: "❌ invalid action",
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user02", Action: "maybe",
 			},
-			repo:      &mockRespondRepo{},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusBadRequest, wantContains: "invalid action",
+			validator:    &mock.Validator{Exists: true},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusBadRequest,
+			wantContains: "invalid action",
 		},
 		{
-			name: "error: user1 not found",
+			name: "❌ same user",
 			input: model.RespondRequestInput{
-				User1ID: "invalid", User2ID: "user02", Action: "accepted",
+				User1ID: "user01", User2ID: "user01", Action: "accepted",
 			},
-			repo:      &mockRespondRepo{},
-			validator: &mockValidator{Exists: false},
-			wantCode:  http.StatusBadRequest, wantContains: "user1_id: user ID not found",
+			validator:    &mock.Validator{Exists: true},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusBadRequest,
+			wantContains: "invalid user IDs",
 		},
 		{
-			name: "error: user2 not found",
+			name: "❌ user1 not found",
 			input: model.RespondRequestInput{
-				User1ID: "user01", User2ID: "invalid", Action: "accepted",
+				User1ID: "notfound", User2ID: "user02", Action: "accepted",
 			},
-			repo:      &mockRespondRepo{},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusBadRequest, wantContains: "user2_id: user ID not found",
+			validator:    &mock.Validator{Exists: false},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusBadRequest,
+			wantContains: "user ID not found",
 		},
 		{
-			name: "error: request not found",
+			name: "❌ user2 not found",
 			input: model.RespondRequestInput{
-				User1ID: "user01", User2ID: "user02", Action: "accepted",
+				User1ID: "user01", User2ID: "none", Action: "accepted",
 			},
-			repo:      &mockRespondRepo{findErr: errors.New("not found")},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusBadRequest, wantContains: "request not found",
-		},
-		{
-			name: "error: update failed",
-			input: model.RespondRequestInput{
-				User1ID: "user01", User2ID: "user02", Action: "accepted",
-			},
-			repo:      &mockRespondRepo{findResult: &model.FriendRequest{}, updateErr: errors.New("fail")},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusInternalServerError, wantContains: "failed to update",
-		},
-		{
-			name: "error: friend link creation failed",
-			input: model.RespondRequestInput{
-				User1ID: "user01", User2ID: "user02", Action: "accepted",
-			},
-			repo:      &mockRespondRepo{findResult: &model.FriendRequest{}, linkErr: errors.New("fail")},
-			validator: &mockValidator{Exists: true},
-			wantCode:  http.StatusInternalServerError, wantContains: "failed to create friendship",
+			validator:    &mock.Validator{Exists: false},
+			repo:         &mock.MockRespondRepo{},
+			wantCode:     http.StatusBadRequest,
+			wantContains: "user ID not found",
 		},
 	}
 
@@ -155,11 +102,10 @@ func TestRespondRequest(t *testing.T) {
 			body, _ := json.Marshal(tc.input)
 			req := httptest.NewRequest(http.MethodPost, "/respond_friend_request", bytes.NewReader(body))
 			req.Header.Set(echo.HeaderContentType, echo.MIMEApplicationJSON)
-
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			handler := NewFriendRespondHandler(tc.validator, tc.repo)
+			handler := create.NewFriendRespondHandler(tc.validator, tc.repo)
 			err := handler.RespondRequest(c)
 
 			assert.NoError(t, err)

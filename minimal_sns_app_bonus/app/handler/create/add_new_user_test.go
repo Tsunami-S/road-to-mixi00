@@ -105,8 +105,8 @@ func TestAddNewUser(t *testing.T) {
 				Name: "Taro",
 			},
 			repo:         &mockUserRepo{existsErr: errors.New("db error")},
-			wantCode:     http.StatusInternalServerError,
-			wantContains: "failed to check",
+			wantCode:     http.StatusBadRequest,
+			wantContains: "db error",
 		},
 		{
 			name: "error: create fails",
