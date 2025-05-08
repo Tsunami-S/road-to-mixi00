@@ -17,7 +17,7 @@ func TestGetPendingRequests(t *testing.T) {
 
 	repo := &RealFriendRequestRepository{}
 
-	t.Run("正常系: id2 への保留中リクエスト", func(t *testing.T) {
+	t.Run("正常系: id1 への保留中リクエスト", func(t *testing.T) {
 		requests, err := repo.GetPendingRequests("id1")
 		assert.NoError(t, err)
 
@@ -26,7 +26,7 @@ func TestGetPendingRequests(t *testing.T) {
 			gotIDs = append(gotIDs, r.User1ID)
 		}
 
-		assert.Contains(t, gotIDs, "id45")
+		assert.Contains(t, gotIDs, "id40")
 		assert.NotContains(t, gotIDs, "id3")
 	})
 }

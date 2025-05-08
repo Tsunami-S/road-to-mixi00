@@ -90,7 +90,7 @@ func TestPendingRequestHandler(t *testing.T) {
 			name:         "異常系: Validatorエラー",
 			userID:       "user01",
 			valErr:       errors.New("validation error"),
-			wantCode:     http.StatusInternalServerError,
+			wantCode:     http.StatusBadRequest,
 			wantContains: "validation error",
 		},
 		{

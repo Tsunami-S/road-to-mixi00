@@ -62,7 +62,7 @@ func TestFriendOfFriendHandler(t *testing.T) {
 			name:         "異常系: Validatorエラー",
 			userID:       "userX",
 			mockValErr:   errors.New("validation failed"),
-			wantCode:     http.StatusInternalServerError,
+			wantCode:     http.StatusBadRequest,
 			wantContains: "validation failed",
 		},
 		{

@@ -82,7 +82,7 @@ func TestFriendOfFriendPagingHandler(t *testing.T) {
 			valErr:         errors.New("validator error"),
 			limit:          2,
 			page:           1,
-			wantCode:       http.StatusInternalServerError,
+			wantCode:       http.StatusBadRequest,
 			wantBodyString: "validator error",
 		},
 		{

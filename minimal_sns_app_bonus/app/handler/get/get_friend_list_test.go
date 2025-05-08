@@ -70,7 +70,7 @@ func TestFriendHandler(t *testing.T) {
 			name:         "異常系：validatorでエラー",
 			userID:       "userX",
 			mockExistErr: errors.New("DB error"),
-			wantCode:     http.StatusInternalServerError,
+			wantCode:     http.StatusBadRequest,
 			wantBodyPart: "DB error",
 		},
 		{

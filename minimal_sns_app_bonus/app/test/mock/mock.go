@@ -145,3 +145,21 @@ func (m *BlockRepository) RejectRequests(user1, user2 string) error {
 func (m *BlockRepository) Block(user1, user2 string) error {
 	return m.OpErr
 }
+
+type MockRespondRepo struct{}
+
+func (m *MockRespondRepo) FindRequest(user1, user2 string) (*model.FriendRequest, error) {
+	return &model.FriendRequest{}, nil
+}
+
+func (m *MockRespondRepo) UpdateRequest(req *model.FriendRequest, action string) error {
+	return nil
+}
+
+func (m *MockRespondRepo) CreateFriendLink(user1, user2 string) error {
+	return nil
+}
+
+func (m *MockRespondRepo) RespondRequest(fromID, toID, action string) error {
+	return nil
+}

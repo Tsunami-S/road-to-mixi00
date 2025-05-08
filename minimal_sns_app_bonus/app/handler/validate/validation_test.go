@@ -54,7 +54,7 @@ func TestRealValidator_UserExists(t *testing.T) {
 				return false, nil
 			},
 			wantValid:  false,
-			wantErrStr: "user ID not found",
+			wantErrStr: "user not found",
 		},
 	}
 

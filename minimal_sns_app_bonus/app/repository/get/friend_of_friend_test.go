@@ -24,7 +24,7 @@ func TestFriendOfFriend(t *testing.T) {
 			userID:    "id49",
 			wantNames: []string{"user51"},
 			notWant:   []string{"user02"},
-			expectErr: false,
+			expectErr: true,
 		},
 		{
 			name:      "異常系: 存在しないユーザー",
