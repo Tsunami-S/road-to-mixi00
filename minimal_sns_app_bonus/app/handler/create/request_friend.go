@@ -41,7 +41,7 @@ func RequestFriend(c echo.Context) error {
 	// check already friends
 	alreadyFriends, err := repo_create.IsAlreadyFriends(req.User1ID, req.User2ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	if alreadyFriends {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you are already friends"})
@@ -59,7 +59,7 @@ func RequestFriend(c echo.Context) error {
 	// check same direction
 	hasSent, err := repo_create.HasAlreadyRequested(req.User1ID, req.User2ID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 	if hasSent {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "friend request already sent"})

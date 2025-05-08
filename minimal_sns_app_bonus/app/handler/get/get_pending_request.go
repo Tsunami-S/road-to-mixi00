@@ -12,13 +12,14 @@ import (
 func PendingRequests(c echo.Context) error {
 	userID := c.QueryParam("user_id")
 
+	// validation
 	if valid, err := validate.IsValidUserId(userID); !valid {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
 	}
 
 	requests, err := repo_get.PendingRequest(userID)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to fetch requests"})
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
 
 	if len(requests) == 0 {

@@ -33,9 +33,10 @@ func main() {
 	e.GET("/pending_requests", get.PendingRequests)
 
 	// for debug
-	e.GET("/all_users", get_all.Users)
-	e.GET("/all_friends", get_all.FriendLinks)
-	e.GET("/all_blocks", get_all.BlockList)
+	e.GET("/get_all_users", get_all.Users)
+	e.GET("/get_all_friends", get_all.FriendLinks)
+	e.GET("/get_all_blocks", get_all.BlockList)
+	e.GET("/get_all_requests", get_all.RequestList)
 
 	// for error
 	e.HTTPErrorHandler = func(err error, c echo.Context) {

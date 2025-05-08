@@ -43,6 +43,8 @@ services:
       - back
     volumes:
       - ./mysql/my.cnf:/etc/mysql/my.cnf
+      - ./mysql/0_init.sql:/docker-entrypoint-initdb.d/0_init.sql
+      - ./mysql/test.sql:/docker-entrypoint-initdb.d/test.sql
     environment:
       MYSQL_ALLOW_EMPTY_PASSWORD: yes
       MYSQL_DATABASE: app

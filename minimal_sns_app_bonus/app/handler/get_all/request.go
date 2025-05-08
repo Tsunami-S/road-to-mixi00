@@ -8,10 +8,10 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func FriendLinks(c echo.Context) error {
-	links, err := repo_all.FriendLinks()
+func RequestList(c echo.Context) error {
+	requests, err := repo_all.FriendRequests()
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	return c.JSON(http.StatusOK, links)
+	return c.JSON(http.StatusOK, requests)
 }

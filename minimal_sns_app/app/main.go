@@ -26,9 +26,9 @@ func main() {
 	e.GET("/get_friend_of_friend_list_paging", get.FriendOfFriendPaging)
 
 	// for debug
-	e.GET("/all_users", get_all.Users)
-	e.GET("/all_friends", get_all.FriendLinks)
-	e.GET("/all_blocks", get_all.BlockList)
+	e.GET("/get_all_users", get_all.Users)
+	e.GET("/get_all_friends", get_all.FriendLinks)
+	e.GET("/get_all_blocks", get_all.BlockList)
 
 	// for error
 	e.HTTPErrorHandler = func(err error, c echo.Context) {
