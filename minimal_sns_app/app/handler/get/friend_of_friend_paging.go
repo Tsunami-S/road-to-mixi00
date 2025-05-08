@@ -4,17 +4,27 @@ import (
 	"net/http"
 	"strconv"
 
-	handle_valid "minimal_sns_app/handler/validate"
-	repo_get "minimal_sns_app/repository/get"
-	rep_valid "minimal_sns_app/repository/validate"
+	"minimal_sns_app/interfaces"
 
 	"github.com/labstack/echo/v4"
 )
 
-func FriendOfFriendPaging(c echo.Context) error {
-	idStr := c.QueryParam("id")
+type FriendOfFriendPagingHandler struct {
+	UserValidator       interfaces.UserValidator
+	PaginationValidator interfaces.PaginationValidator
+	Repo                interfaces.FriendOfFriendPagingRepository
+}
 
-	// validation
+func NewFriendOfFriendPagingHandler(u interfaces.UserValidator, p interfaces.PaginationValidator, r interfaces.FriendOfFriendPagingRepository) *FriendOfFriendPagingHandler {
+	return &FriendOfFriendPagingHandler{
+		UserValidator:       u,
+		PaginationValidator: p,
+		Repo:                r,
+	}
+}
+
+func (h *FriendOfFriendPagingHandler) FriendOfFriendPaging(c echo.Context) error {
+	idStr := c.QueryParam("id")
 	if idStr == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
@@ -22,11 +32,13 @@ func FriendOfFriendPaging(c echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
 	}
-	limit, page, err := handle_valid.ParseAndValidatePagination(c)
+
+	limit, page, err := h.PaginationValidator.ParseAndValidatePagination(c)
 	if err != nil {
 		return err
 	}
-	exist, err := rep_valid.UserExists(id)
+
+	exist, err := h.UserValidator.UserExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -34,9 +46,8 @@ func FriendOfFriendPaging(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
 	}
 
-	// get friend list with paging
 	offset := (page - 1) * limit
-	result, err := repo_get.FriendOfFriendPaging(id, limit, offset)
+	result, err := h.Repo.GetFriendOfFriendByIDWithPaging(id, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

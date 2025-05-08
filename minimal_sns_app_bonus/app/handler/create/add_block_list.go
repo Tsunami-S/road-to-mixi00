@@ -3,32 +3,44 @@ package create
 import (
 	"net/http"
 
-	"minimal_sns_app/handler/validate"
-	"minimal_sns_app/model"
-	repo_create "minimal_sns_app/repository/create"
-
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/interfaces"
+	"minimal_sns_app/model"
 )
 
-func AddBlockList(c echo.Context) error {
+type BlockHandler struct {
+	Validator interfaces.Validator
+	Repo      interfaces.BlockRepository
+}
+
+func NewBlockHandler(v interfaces.Validator, r interfaces.BlockRepository) *BlockHandler {
+	return &BlockHandler{
+		Validator: v,
+		Repo:      r,
+	}
+}
+
+func (h *BlockHandler) AddBlockList(c echo.Context) error {
 	var req model.BlockRequest
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request format"})
 	}
 
-	// validation
-	if valid, err := validate.IsValidUserId(req.User1ID); !valid {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
-	}
-	if valid, err := validate.IsValidUserId(req.User2ID); !valid {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
+	if req.User1ID == "" || req.User2ID == "" || len(req.User1ID) > 20 || len(req.User2ID) > 20 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user IDs"})
 	}
 	if req.User1ID == req.User2ID {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot block yourself"})
 	}
 
-	// check already blocked
-	blocked, err := repo_create.IsBlocked(req.User1ID, req.User2ID)
+	if exist, err := h.Validator.UserExists(req.User1ID); err != nil || !exist {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user1_id"})
+	}
+	if exist, err := h.Validator.UserExists(req.User2ID); err != nil || !exist {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid user2_id"})
+	}
+
+	blocked, err := h.Repo.IsBlocked(req.User1ID, req.User2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -36,18 +48,13 @@ func AddBlockList(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "already blocked"})
 	}
 
-	// remove friendship
-	if err := repo_create.DeleteFriendLink(req.User1ID, req.User2ID); err != nil {
+	if err := h.Repo.DeleteFriendLink(req.User1ID, req.User2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to delete friendship"})
 	}
-
-	// reject pending requests
-	if err := repo_create.RejectRequests(req.User1ID, req.User2ID); err != nil {
+	if err := h.Repo.RejectRequests(req.User1ID, req.User2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to reject friend request"})
 	}
-
-	// add to block list
-	if err := repo_create.Block(req.User1ID, req.User2ID); err != nil {
+	if err := h.Repo.Block(req.User1ID, req.User2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to block user"})
 	}
 

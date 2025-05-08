@@ -6,10 +6,11 @@ import (
 	"strings"
 	"testing"
 
-	"minimal_sns_app/db"
-	"minimal_sns_app/handler/create"
-
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/db"
+	handler_create "minimal_sns_app/handler/create"
+	"minimal_sns_app/handler/validate"
+	repo_create "minimal_sns_app/repository/create"
 )
 
 func setupTestDB_Block(t *testing.T) {
@@ -19,6 +20,11 @@ func setupTestDB_Block(t *testing.T) {
 func TestAddBlockList_Scenarios(t *testing.T) {
 	setupTestDB_Block(t)
 	e := echo.New()
+
+	handler := handler_create.NewBlockHandler(
+		&validate.RealValidator{},
+		&repo_create.RealBlockRepository{},
+	)
 
 	tests := []struct {
 		name     string
@@ -54,13 +60,13 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 			name:     "5.存在しない user1_id",
 			body:     `{"user1_id":"invalid_id", "user2_id":"id2"}`,
 			wantCode: http.StatusBadRequest,
-			wantBody: "user1_id: user ID not found",
+			wantBody: "invalid user1_id",
 		},
 		{
 			name:     "6.存在しない user2_id",
 			body:     `{"user1_id":"id2", "user2_id":"invalid_id"}`,
 			wantCode: http.StatusBadRequest,
-			wantBody: "user2_id: user ID not found",
+			wantBody: "invalid user2_id",
 		},
 	}
 
@@ -72,12 +78,11 @@ func TestAddBlockList_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := create.AddBlockList(c); err != nil {
+			if err := handler.AddBlockList(c); err != nil {
 				t.Fatal(err)
 			}
 
 			body := rec.Body.String()
-
 			if rec.Code != tc.wantCode {
 				t.Errorf("ステータスコード不一致: got=%d, want=%d", rec.Code, tc.wantCode)
 			}

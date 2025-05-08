@@ -8,6 +8,9 @@ import (
 
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/create"
+	"minimal_sns_app/handler/validate"
+	"minimal_sns_app/interfaces"
+	repo_create "minimal_sns_app/repository/create"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,54 +23,24 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 	setupTestDB_Respond(t)
 	e := echo.New()
 
+	handler := create.NewRespondFriendRequestHandler(
+		&validate.RealValidator{},
+		&repo_create.RealFriendRequestManager{},
+	)
+
 	tests := []struct {
 		name     string
 		body     string
 		wantCode int
 		wantBody string
 	}{
-		{
-			name:     "1.正常に申請を承認",
-			body:     `{"user1_id":"id45", "user2_id":"id1", "action":"accepted"}`,
-			wantCode: http.StatusOK,
-			wantBody: "request accepted",
-		},
-		{
-			name:     "2.正常に申請を拒否",
-			body:     `{"user1_id":"id11", "user2_id":"id27", "action":"rejected"}`,
-			wantCode: http.StatusOK,
-			wantBody: "request rejected",
-		},
-		{
-			name:     "3.自分自身に応答",
-			body:     `{"user1_id":"id1", "user2_id":"id1", "action":"accepted"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "invalid user IDs",
-		},
-		{
-			name:     "4.存在しない申請",
-			body:     `{"user1_id":"id3", "user2_id":"id4", "action":"accepted"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "request not found",
-		},
-		{
-			name:     "5.不正なアクション",
-			body:     `{"user1_id":"id45", "user2_id":"id1", "action":"maybe"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "invalid action",
-		},
-		{
-			name:     "6.無効な user1_id",
-			body:     `{"user1_id":"invalid", "user2_id":"id1", "action":"accepted"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "user1_id: user ID not found",
-		},
-		{
-			name:     "7.無効な user2_id",
-			body:     `{"user1_id":"id1", "user2_id":"invalid", "action":"accepted"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "user2_id: user ID not found",
-		},
+		{"1.正常に申請を承認", `{"user1_id":"id45", "user2_id":"id1", "action":"accepted"}`, http.StatusOK, "request accepted"},
+		{"2.正常に申請を拒否", `{"user1_id":"id11", "user2_id":"id27", "action":"rejected"}`, http.StatusOK, "request rejected"},
+		{"3.自分自身に応答", `{"user1_id":"id1", "user2_id":"id1", "action":"accepted"}`, http.StatusBadRequest, "invalid user IDs"},
+		{"4.存在しない申請", `{"user1_id":"id3", "user2_id":"id4", "action":"accepted"}`, http.StatusBadRequest, "request not found"},
+		{"5.不正なアクション", `{"user1_id":"id45", "user2_id":"id1", "action":"maybe"}`, http.StatusBadRequest, "invalid action"},
+		{"6.無効な user1_id", `{"user1_id":"invalid", "user2_id":"id1", "action":"accepted"}`, http.StatusBadRequest, "user1_id: user ID not found"},
+		{"7.無効な user2_id", `{"user1_id":"id1", "user2_id":"invalid", "action":"accepted"}`, http.StatusBadRequest, "user2_id: user ID not found"},
 	}
 
 	for _, tc := range tests {
@@ -78,7 +51,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := create.RespondRequest(c); err != nil {
+			if err := handler.RespondRequest(c); err != nil {
 				t.Fatal(err)
 			}
 

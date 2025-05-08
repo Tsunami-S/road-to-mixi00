@@ -5,7 +5,9 @@ import (
 	"minimal_sns_app/model"
 )
 
-func FriendOfFriendPaging(id string, limit, offset int) ([]model.Friend, error) {
+type RealFriendOfFriendPagingRepository struct{}
+
+func (r *RealFriendOfFriendPagingRepository) GetFriendOfFriendByIDWithPaging(id string, limit, offset int) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `

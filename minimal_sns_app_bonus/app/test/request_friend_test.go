@@ -8,6 +8,8 @@ import (
 
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/create"
+	"minimal_sns_app/handler/validate"
+	repo_create "minimal_sns_app/repository/create"
 
 	"github.com/labstack/echo/v4"
 )
@@ -20,72 +22,27 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 	setupTestDB_Request(t)
 	e := echo.New()
 
+	handler := create.NewRequestFriendHandler(
+		&validate.RealValidator{},
+		&repo_create.RealFriendRequestManager{},
+	)
+
 	tests := []struct {
 		name     string
 		body     string
 		wantCode int
 		wantBody string
 	}{
-		{
-			name:     "1.正常なフレンド申請",
-			body:     `{"user1_id":"id32","user2_id":"id43"}`,
-			wantCode: http.StatusOK,
-			wantBody: "friend request sent",
-		},
-		{
-			name:     "2.自分自身に申請",
-			body:     `{"user1_id":"id1","user2_id":"id1"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "cannot request yourself",
-		},
-		{
-			name:     "3.ブロックしている",
-			body:     `{"user1_id":"id1","user2_id":"id39"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "cannot send friend request due to block",
-		},
-		{
-			name:     "4.ブロックされている",
-			body:     `{"user1_id":"id1","user2_id":"id40"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "cannot send friend request due to block",
-		},
-		{
-			name:     "5.すでにフレンド",
-			body:     `{"user1_id":"id1","user2_id":"id2"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "you are already friends",
-		},
-		{
-			name:     "6.すでにフレンド(相手から)",
-			body:     `{"user1_id":"id1","user2_id":"id4"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "you are already friends",
-		},
-		{
-			name:     "7.逆方向にpendingな申請がある",
-			body:     `{"user1_id":"id41","user2_id":"id1"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "you already have a pending request from this user",
-		},
-		{
-			name:     "8.同じ方向の申請がすでにある",
-			body:     `{"user1_id":"id1","user2_id":"id27"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "friend request already sent",
-		},
-		{
-			name:     "9.存在しない user1_id",
-			body:     `{"user1_id":"invalid_user","user2_id":"id2"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "user1_id: user ID not found",
-		},
-		{
-			name:     "10.存在しない user2_id",
-			body:     `{"user1_id":"id2","user2_id":"invalid_user"}`,
-			wantCode: http.StatusBadRequest,
-			wantBody: "user2_id: user ID not found",
-		},
+		{"1.正常なフレンド申請", `{"user1_id":"id32","user2_id":"id43"}`, http.StatusOK, "friend request sent"},
+		{"2.自分自身に申請", `{"user1_id":"id1","user2_id":"id1"}`, http.StatusBadRequest, "cannot request yourself"},
+		{"3.ブロックしている", `{"user1_id":"id1","user2_id":"id39"}`, http.StatusBadRequest, "cannot send friend request due to block"},
+		{"4.ブロックされている", `{"user1_id":"id1","user2_id":"id40"}`, http.StatusBadRequest, "cannot send friend request due to block"},
+		{"5.すでにフレンド", `{"user1_id":"id1","user2_id":"id2"}`, http.StatusBadRequest, "you are already friends"},
+		{"6.すでにフレンド(相手から)", `{"user1_id":"id1","user2_id":"id4"}`, http.StatusBadRequest, "you are already friends"},
+		{"7.逆方向にpendingな申請がある", `{"user1_id":"id41","user2_id":"id1"}`, http.StatusBadRequest, "you already have a pending request from this user"},
+		{"8.同じ方向の申請がすでにある", `{"user1_id":"id1","user2_id":"id27"}`, http.StatusBadRequest, "friend request already sent"},
+		{"9.存在しない user1_id", `{"user1_id":"invalid_user","user2_id":"id2"}`, http.StatusBadRequest, "user1_id: user ID not found"},
+		{"10.存在しない user2_id", `{"user1_id":"id2","user2_id":"invalid_user"}`, http.StatusBadRequest, "user2_id: user ID not found"},
 	}
 
 	for _, tc := range tests {
@@ -96,7 +53,7 @@ func TestRequestFriend_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := create.RequestFriend(c); err != nil {
+			if err := handler.RequestFriend(c); err != nil {
 				t.Fatal(err)
 			}
 

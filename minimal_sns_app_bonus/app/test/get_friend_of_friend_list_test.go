@@ -8,17 +8,25 @@ import (
 
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
+	"minimal_sns_app/handler/validate"
+	"minimal_sns_app/interfaces"
+	repo_get "minimal_sns_app/repository/get"
 
 	"github.com/labstack/echo/v4"
 )
 
-func setupTestDB_FOF(t *testing.T) {
+func setupTestDB_FOF_List(t *testing.T) {
 	db.DB = initTestDB()
 }
 
 func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
-	setupTestDB_FOF(t)
+	setupTestDB_FOF_List(t)
 	e := echo.New()
+
+	handler := get.NewFriendOfFriendHandler(
+		&validate.RealValidator{},
+		&repo_get.RealFriendOfFriendRepository{},
+	)
 
 	tests := []struct {
 		name      string
@@ -95,31 +103,31 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := get.FriendOfFriend(c); err != nil {
+			if err := handler.FriendOfFriend(c); err != nil {
 				t.Fatal(err)
 			}
+
+			body := rec.Body.String()
 
 			if rec.Code != tc.wantCode {
 				t.Errorf("ステータスコード不一致: got %d, want %d", rec.Code, tc.wantCode)
 			}
-
-			body := rec.Body.String()
 			if tc.wantBody != "" && !strings.Contains(body, tc.wantBody) {
-				t.Errorf("期待する文字列が含まれない: want=%q, got=%q", tc.wantBody, body)
+				t.Errorf("期待する文字列が含まれていない: want=%q, got=%q", tc.wantBody, body)
 			}
 			if tc.notInBody != "" && strings.Contains(body, tc.notInBody) {
 				t.Errorf("含まれてはいけない文字列が含まれている: notWant=%q, got=%q", tc.notInBody, body)
 			}
 			if tc.name == "9.相互関係の友達の友達は重複しない" {
-				count := strings.Count(rec.Body.String(), "user14")
+				count := strings.Count(body, "user14")
 				if count > 1 {
-					t.Errorf("11.user14 が重複して含まれている: 出現数 = %d", count)
+					t.Errorf("user14 が重複して含まれている: 出現数 = %d", count)
 				}
 			}
 			if tc.name == "10.共通の友人は重複しない" {
-				count := strings.Count(rec.Body.String(), "user12")
+				count := strings.Count(body, "user12")
 				if count > 1 {
-					t.Errorf("12.user12 が重複して含まれている: 出現数 = %d", count)
+					t.Errorf("user12 が重複して含まれている: 出現数 = %d", count)
 				}
 			}
 		})

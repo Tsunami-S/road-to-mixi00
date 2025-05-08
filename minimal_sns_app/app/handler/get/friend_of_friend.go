@@ -4,16 +4,22 @@ import (
 	"net/http"
 	"strconv"
 
-	repo_get "minimal_sns_app/repository/get"
-	"minimal_sns_app/repository/validate"
+	"minimal_sns_app/interfaces"
 
 	"github.com/labstack/echo/v4"
 )
 
-func FriendOfFriend(c echo.Context) error {
-	idStr := c.QueryParam("id")
+type FriendOfFriendHandler struct {
+	Validator interfaces.UserValidator
+	Repo      interfaces.FriendOfFriendRepository
+}
 
-	// validation
+func NewFriendOfFriendHandler(v interfaces.UserValidator, r interfaces.FriendOfFriendRepository) *FriendOfFriendHandler {
+	return &FriendOfFriendHandler{Validator: v, Repo: r}
+}
+
+func (h *FriendOfFriendHandler) FriendOfFriend(c echo.Context) error {
+	idStr := c.QueryParam("id")
 	if idStr == "" {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id is required"})
 	}
@@ -21,7 +27,8 @@ func FriendOfFriend(c echo.Context) error {
 	if err != nil || id <= 0 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must be a positive integer"})
 	}
-	exist, err := validate.UserExists(id)
+
+	exist, err := h.Validator.UserExists(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -29,8 +36,7 @@ func FriendOfFriend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
 	}
 
-	// get friend of friend list
-	result, err := repo_get.FriendOfFriend(id)
+	result, err := h.Repo.GetFriendOfFriend(id)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

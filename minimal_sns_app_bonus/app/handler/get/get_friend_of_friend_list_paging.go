@@ -3,27 +3,48 @@ package get
 import (
 	"net/http"
 
-	"minimal_sns_app/handler/validate"
-	repo_get "minimal_sns_app/repository/get"
-
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/interfaces"
 )
 
-func FriendOfFriendPaging(c echo.Context) error {
+type FriendOfFriendPagingHandler struct {
+	Validator           interfaces.Validator
+	PaginationValidator interfaces.PaginationValidator
+	Repo                interfaces.FriendOfFriendPagingRepository
+}
+
+func NewFriendOfFriendPagingHandler(v interfaces.Validator, p interfaces.PaginationValidator, r interfaces.FriendOfFriendPagingRepository) *FriendOfFriendPagingHandler {
+	return &FriendOfFriendPagingHandler{
+		Validator:           v,
+		PaginationValidator: p,
+		Repo:                r,
+	}
+}
+
+func (h *FriendOfFriendPagingHandler) FriendOfFriendPaging(c echo.Context) error {
 	userID := c.QueryParam("id")
-
-	// validation
-	if valid, err := validate.IsValidUserId(userID); !valid {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id: " + err.Error()})
+	if userID == "" || len(userID) > 20 {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user_id must be a non-empty string up to 20 characters"})
 	}
-	limit, page, err := validate.ParseAndValidatePagination(c)
+
+	exists, err := h.Validator.UserExists(userID)
 	if err != nil {
-		return err
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	if !exists {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user not found"})
 	}
 
-	// get friend list with paging
+	limit, page, err := h.PaginationValidator.ParseAndValidatePagination(c)
+	if err != nil {
+		if httpErr, ok := err.(*echo.HTTPError); ok {
+			return c.JSON(httpErr.Code, map[string]string{"error": httpErr.Message.(string)})
+		}
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
 	offset := (page - 1) * limit
-	result, err := repo_get.FriendOfFriendPaging(userID, limit, offset)
+
+	result, err := h.Repo.GetFriendOfFriendByIDWithPaging(userID, limit, offset)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}

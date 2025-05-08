@@ -3,28 +3,39 @@ package create
 import (
 	"net/http"
 
-	"minimal_sns_app/model"
-	repo_create "minimal_sns_app/repository/create"
-
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/interfaces"
+	"minimal_sns_app/model"
 )
 
-func AddNewUser(c echo.Context) error {
+type UserHandler struct {
+	Repo interfaces.UserRepository
+}
+
+func NewUserHandler(r interfaces.UserRepository) *UserHandler {
+	return &UserHandler{
+		Repo: r,
+	}
+}
+
+func (h *UserHandler) AddNewUser(c echo.Context) error {
 	var req model.AddUserRequest
 
-	// bind json to struct
+	// parse JSON body into struct
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request format"})
 	}
 
-	// validation
+	// validate ID and Name
 	if req.ID == "" || len(req.ID) > 20 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "id must have 1 ~ 20 characters"})
 	}
 	if req.Name == "" || len(req.Name) > 64 {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "name must have 1 ~ 64 characters"})
 	}
-	exists, err := repo_create.IsUserIDExists(req.ID)
+
+	// check if ID already exists
+	exists, err := h.Repo.IsUserIDExists(req.ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to check user ID uniqueness"})
 	}
@@ -32,8 +43,8 @@ func AddNewUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user ID already exists"})
 	}
 
-	// add new user
-	if err := repo_create.User(req.ID, req.Name); err != nil {
+	// insert new user
+	if err := h.Repo.CreateUser(req.ID, req.Name); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to create user"})
 	}
 

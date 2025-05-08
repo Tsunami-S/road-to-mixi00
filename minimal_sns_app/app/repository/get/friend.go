@@ -5,6 +5,12 @@ import (
 	"minimal_sns_app/model"
 )
 
+type RealFriendRepository struct{}
+
+func (r *RealFriendRepository) GetFriends(id int) ([]model.Friend, error) {
+	return Friend(id)
+}
+
 func Friend(id int) ([]model.Friend, error) {
 	var friends []model.Friend
 	query := `

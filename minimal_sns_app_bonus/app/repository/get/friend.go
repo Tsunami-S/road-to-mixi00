@@ -5,8 +5,11 @@ import (
 	"minimal_sns_app/model"
 )
 
-func Friend(id string) ([]model.Friend, error) {
+type RealFriendRepository struct{}
+
+func (r *RealFriendRepository) GetFriends(userID string) ([]model.Friend, error) {
 	var friends []model.Friend
+
 	query := `
         SELECT u.user_id AS id, u.name
         FROM friend_link f
@@ -29,7 +32,7 @@ func Friend(id string) ([]model.Friend, error) {
         );
     `
 
-	err := db.DB.Raw(query, id, id).Scan(&friends).Error
+	err := db.DB.Raw(query, userID, userID).Scan(&friends).Error
 
 	return friends, err
 }

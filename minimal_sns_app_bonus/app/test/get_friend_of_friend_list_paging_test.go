@@ -6,14 +6,28 @@ import (
 	"strings"
 	"testing"
 
+	"minimal_sns_app/db"
 	"minimal_sns_app/handler/get"
+	"minimal_sns_app/handler/validate"
+	"minimal_sns_app/interfaces"
+	repo_get "minimal_sns_app/repository/get"
 
 	"github.com/labstack/echo/v4"
 )
 
+func setupTestDB_FOF_Paging(t *testing.T) {
+	db.DB = initTestDB()
+}
+
 func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
-	setupTestDB_FOF(t)
+	setupTestDB_FOF_Paging(t)
 	e := echo.New()
+
+	handler := get.NewFriendOfFriendPagingHandler(
+		&validate.RealValidator{},
+		&validate.RealPaginationValidator{},
+		&repo_get.RealFriendOfFriendPagingRepository{},
+	)
 
 	tests := []struct {
 		name      string
@@ -65,17 +79,17 @@ func TestGetFriendOfFriendListPaging_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			if err := get.FriendOfFriendPaging(c); err != nil {
+			if err := handler.FriendOfFriendPaging(c); err != nil {
 				t.Fatal(err)
 			}
+
+			body := rec.Body.String()
 
 			if rec.Code != tc.wantCode {
 				t.Errorf("ステータスコード不一致: got %d, want %d", rec.Code, tc.wantCode)
 			}
-
-			body := rec.Body.String()
 			if tc.wantBody != "" && !strings.Contains(body, tc.wantBody) {
-				t.Errorf("期待する文字列が含まれない: want=%q, got=%q", tc.wantBody, body)
+				t.Errorf("期待する文字列が含まれていない: want=%q, got=%q", tc.wantBody, body)
 			}
 			if tc.notInBody != "" && strings.Contains(body, tc.notInBody) {
 				t.Errorf("含まれてはいけない文字列が含まれている: notWant=%q, got=%q", tc.notInBody, body)

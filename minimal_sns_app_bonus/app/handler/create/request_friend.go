@@ -3,34 +3,51 @@ package create
 import (
 	"net/http"
 
-	"minimal_sns_app/handler/validate"
-	"minimal_sns_app/model"
-	repo_create "minimal_sns_app/repository/create"
-
 	"github.com/labstack/echo/v4"
+	"minimal_sns_app/interfaces"
+	"minimal_sns_app/model"
 )
 
-func RequestFriend(c echo.Context) error {
+type RequestFriendHandler struct {
+	Validator interfaces.Validator
+	Repo      interfaces.FriendRequestRepository
+}
+
+func NewRequestFriendHandler(v interfaces.Validator, r interfaces.FriendRequestRepository) *RequestFriendHandler {
+	return &RequestFriendHandler{
+		Validator: v,
+		Repo:      r,
+	}
+}
+
+func (h *RequestFriendHandler) RequestFriend(c echo.Context) error {
 	var req model.FriendRequestInput
 
-	// bind json to struct
 	if err := c.Bind(&req); err != nil {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "invalid request format"})
 	}
 
-	// validation
-	if valid, err := validate.IsValidUserId(req.User1ID); !valid {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: " + err.Error()})
+	exists, err := h.Validator.UserExists(req.User1ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
-	if valid, err := validate.IsValidUserId(req.User2ID); !valid {
-		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: " + err.Error()})
+	if !exists {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user1_id: user ID not found"})
 	}
+
+	exists, err = h.Validator.UserExists(req.User2ID)
+	if err != nil {
+		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	}
+	if !exists {
+		return c.JSON(http.StatusBadRequest, map[string]string{"error": "user2_id: user ID not found"})
+	}
+
 	if req.User1ID == req.User2ID {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot request yourself"})
 	}
 
-	// check block
-	blocked, err := repo_create.IsBlockedEachOther(req.User1ID, req.User2ID)
+	blocked, err := h.Repo.IsBlockedEachOther(req.User1ID, req.User2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -38,8 +55,7 @@ func RequestFriend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "cannot send friend request due to block"})
 	}
 
-	// check already friends
-	alreadyFriends, err := repo_create.IsAlreadyFriends(req.User1ID, req.User2ID)
+	alreadyFriends, err := h.Repo.IsAlreadyFriends(req.User1ID, req.User2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -47,8 +63,7 @@ func RequestFriend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you are already friends"})
 	}
 
-	// check reverse request
-	hasReverse, err := repo_create.HasPendingRequest(req.User2ID, req.User1ID)
+	hasReverse, err := h.Repo.HasPendingRequest(req.User2ID, req.User1ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "DB error"})
 	}
@@ -56,8 +71,7 @@ func RequestFriend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "you already have a pending request from this user"})
 	}
 
-	// check same direction
-	hasSent, err := repo_create.HasAlreadyRequested(req.User1ID, req.User2ID)
+	hasSent, err := h.Repo.HasPendingRequest(req.User1ID, req.User2ID)
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 	}
@@ -65,8 +79,7 @@ func RequestFriend(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": "friend request already sent"})
 	}
 
-	// request
-	if err := repo_create.Request(req.User1ID, req.User2ID); err != nil {
+	if err := h.Repo.Request(req.User1ID, req.User2ID); err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]string{"error": "failed to send friend request"})
 	}
 

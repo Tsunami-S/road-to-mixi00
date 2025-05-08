@@ -8,6 +8,7 @@ import (
 
 	"minimal_sns_app/db"
 	"minimal_sns_app/handler/create"
+	repo_create "minimal_sns_app/repository/create"
 
 	"github.com/labstack/echo/v4"
 )
@@ -19,6 +20,8 @@ func setupTestDB_AddUser(t *testing.T) {
 func TestAddNewUser_Scenarios(t *testing.T) {
 	setupTestDB_AddUser(t)
 	e := echo.New()
+
+	handler := create.NewAddUserHandler(&repo_create.RealUserRepository{})
 
 	tests := []struct {
 		name     string
@@ -71,7 +74,7 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			err := create.AddNewUser(c)
+			err := handler.AddNewUser(c)
 			if err != nil {
 				t.Fatal(err)
 			}
@@ -80,7 +83,7 @@ func TestAddNewUser_Scenarios(t *testing.T) {
 				t.Errorf("ステータスコード不一致: got=%d, want=%d", rec.Code, tc.wantCode)
 			}
 			if !strings.Contains(rec.Body.String(), tc.wantBody) {
-				t.Errorf("期待する文字列が含まれない: want=%q, got=%q", tc.wantBody, rec.Body.String())
+				t.Errorf("期待する文字列が含まれていない: want=%q, got=%q", tc.wantBody, rec.Body.String())
 			}
 		})
 	}

@@ -5,7 +5,9 @@ import (
 	"minimal_sns_app/model"
 )
 
-func PendingRequest(userID string) ([]model.FriendRequest, error) {
+type RealFriendRequestRepository struct{}
+
+func (r *RealFriendRequestRepository) GetPendingRequests(userID string) ([]model.FriendRequest, error) {
 	var requests []model.FriendRequest
 
 	query := `

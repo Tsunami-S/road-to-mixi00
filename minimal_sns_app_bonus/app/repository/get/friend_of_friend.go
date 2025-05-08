@@ -5,7 +5,9 @@ import (
 	"minimal_sns_app/model"
 )
 
-func FriendOfFriend(id string) ([]model.Friend, error) {
+type RealFriendOfFriendRepository struct{}
+
+func (r *RealFriendOfFriendRepository) GetFriendOfFriend(id string) ([]model.Friend, error) {
 	var result []model.Friend
 
 	query := `
