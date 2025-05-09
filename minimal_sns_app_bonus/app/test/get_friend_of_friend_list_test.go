@@ -38,7 +38,7 @@ func TestGetFriendOfFriendList_Scenarios(t *testing.T) {
 			name:     "1.友達の友達が返される（id1）",
 			userID:   "id1",
 			wantCode: http.StatusOK,
-			wantBody: "user13",
+			wantBody: "user11",
 		},
 		{
 			name:      "2.直接のフレンドは含まれない",

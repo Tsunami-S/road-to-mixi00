@@ -8,4 +8,4 @@ INSERT INTO block_list (user1_id, user2_id) VALUES
   ('id1', 'id39'), ('id40', 'id1'), ('id38', 'id1'), ('id1', 'id37'), ('id7', 'id3'), ('id3', 'id6'), ('id41', 'id3'), ('id3', 'id41'), ('id42', 'id3'), ('id3', 'id43'), ('id17', 'id2'), ('id2', 'id16'), ('id2', 'id15'), ('id14', 'id2'), ('id19', 'id1'), ('id1', 'id18'), ('id1', 'id20'), ('id20', 'id1'), ('id21', 'id1'), ('id1', 'id22'), ('id23', 'id1'), ('id1', 'id24'), ('id26', 'id1'), ('id1', 'id25'), ('id4', 'id27'), ('id28', 'id4'), ('id4', 'id29'), ('id30', 'id4'), ('id33', 'id5'), ('id5', 'id34'), ('id35', 'id5'), ('id5', 'id35'), ('id5', 'id9'), ('id8', 'id5'), ('id1', 'id1');
 
 INSERT INTO friend_requests (user1_id, user2_id, status) VALUES
-  ('id1', 'id41', 'pending'), ('id1', 'id27', 'pending'), ('id1', 'id46', 'rejected'), ('id45', 'id1', 'pending'), ('id1', 'id1', 'pending'), ('id11', 'id27', 'pending');
+  ('id1', 'id41', 'pending'), ('id1', 'id27', 'pending'), ('id1', 'id46', 'rejected'), ('id45', 'id1', 'pending'), ('id1', 'id1', 'pending'), ('id11', 'id27', 'pending'), ('id39', 'id41', 'pending'), ('id5', 'id41', 'pending'), ('id8', 'id48', 'pending');

@@ -34,7 +34,7 @@ func TestRespondFriendRequest_Scenarios(t *testing.T) {
 		wantBody string
 	}{
 		{"1.正常に申請を承認", `{"user1_id":"id45", "user2_id":"id1", "action":"accepted"}`, http.StatusOK, "request accepted"},
-		{"2.正常に申請を拒否", `{"user1_id":"id11", "user2_id":"id27", "action":"rejected"}`, http.StatusOK, "request rejected"},
+		{"2.正常に申請を拒否", `{"user1_id":"id39", "user2_id":"id41", "action":"rejected"}`, http.StatusOK, "request rejected"},
 		{"3.自分自身に応答", `{"user1_id":"id1", "user2_id":"id1", "action":"accepted"}`, http.StatusBadRequest, "invalid user IDs"},
 		{"4.存在しない申請", `{"user1_id":"id3", "user2_id":"id4", "action":"accepted"}`, http.StatusBadRequest, "request not found"},
 		{"5.不正なアクション", `{"user1_id":"id45", "user2_id":"id1", "action":"maybe"}`, http.StatusBadRequest, "invalid action"},

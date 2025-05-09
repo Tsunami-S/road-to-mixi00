@@ -34,11 +34,11 @@ func TestBlock(t *testing.T) {
 	setupTestDB_Block(t)
 	repo := &RealBlockRepository{}
 
-	err := repo.Block("id1", "id2")
+	err := repo.Block("id1", "id33")
 	assert.NoError(t, err)
 
 	var blk model.BlockList
-	err = db.DB.Where("user1_id = ? AND user2_id = ?", "id1", "id2").First(&blk).Error
+	err = db.DB.Where("user1_id = ? AND user2_id = ?", "id1", "id33").First(&blk).Error
 	assert.NoError(t, err)
 }
 

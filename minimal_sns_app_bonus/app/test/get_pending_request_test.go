@@ -35,10 +35,10 @@ func TestGetPendingRequests_Scenarios(t *testing.T) {
 		notInBody string
 	}{
 		{
-			name:     "1.id41 に保留中リクエストあり",
-			userID:   "id41",
+			name:     "1.id48 に保留中リクエストあり",
+			userID:   "id48",
 			wantCode: http.StatusOK,
-			wantBody: `"user1_id":"id1"`,
+			wantBody: `"user1_id":"id8"`,
 		},
 		{
 			name:     "2.id46 にリクエスト（rejected なので含まれない）",
