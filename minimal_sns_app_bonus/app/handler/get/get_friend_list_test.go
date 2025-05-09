@@ -7,28 +7,11 @@ import (
 	"testing"
 
 	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockValidator struct {
-	exists bool
-	err    error
-}
-
-func (m *mockValidator) UserExists(id string) (bool, error) {
-	return m.exists, m.err
-}
-
-type mockFriendRepository struct {
-	friends []model.Friend
-	err     error
-}
-
-func (m *mockFriendRepository) GetFriends(id string) ([]model.Friend, error) {
-	return m.friends, m.err
-}
 
 func TestFriendHandler(t *testing.T) {
 	e := echo.New()
@@ -91,9 +74,16 @@ func TestFriendHandler(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			v := &mockValidator{exists: tc.mockExists, err: tc.mockExistErr}
-			r := &mockFriendRepository{friends: tc.mockFriends, err: tc.mockFriendErr}
-			h := NewFriendHandler(v, r)
+			validator := &mock.UserValidatorMock{
+				UserExistsResult: tc.mockExists,
+				Err:              tc.mockExistErr,
+			}
+			repo := &mock.FriendRepositoryMock{
+				Friends: tc.mockFriends,
+				Err:     tc.mockFriendErr,
+			}
+
+			h := NewFriendHandler(validator, repo)
 
 			req := httptest.NewRequest(http.MethodGet, "/?id="+tc.userID, nil)
 			rec := httptest.NewRecorder()

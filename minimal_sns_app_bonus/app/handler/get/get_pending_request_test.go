@@ -8,47 +8,11 @@ import (
 	"testing"
 
 	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockRequestRepo struct {
-	result []model.FriendRequest
-	err    error
-}
-
-func (m *mockRequestRepo) GetPendingRequests(userID string) ([]model.FriendRequest, error) {
-	return m.result, m.err
-}
-
-func (m *mockRequestRepo) SendRequest(fromID, toID string) error {
-	return nil
-}
-
-func (m *mockRequestRepo) RespondRequest(fromID, toID, action string) error {
-	return nil
-}
-
-func (m *mockRequestRepo) HasAlreadyRequested(user1, user2 string) (bool, error) {
-	return false, nil
-}
-
-func (m *mockRequestRepo) HasPendingRequest(user1, user2 string) (bool, error) {
-	return false, nil
-}
-
-func (m *mockRequestRepo) IsAlreadyFriends(user1, user2 string) (bool, error) {
-	return false, nil
-}
-
-func (m *mockRequestRepo) IsBlockedEachOther(user1, user2 string) (bool, error) {
-	return false, nil
-}
-
-func (m *mockRequestRepo) Request(user1, user2 string) error {
-	return nil
-}
 
 func TestPendingRequestHandler(t *testing.T) {
 	e := echo.New()
@@ -117,8 +81,14 @@ func TestPendingRequestHandler(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			v := &mockValidator{exists: tc.valExists, err: tc.valErr}
-			r := &mockRequestRepo{result: tc.repoResult, err: tc.repoErr}
+			v := &mock.UserValidatorMock{
+				UserExistsResult: tc.valExists,
+				Err:              tc.valErr,
+			}
+			r := &mock.FriendRequestRepositoryMock{
+				PendingRequestsResult: tc.repoResult,
+				PendingRequestsErr:    tc.repoErr,
+			}
 			h := NewPendingRequestHandler(v, r)
 
 			req := httptest.NewRequest(http.MethodGet, "/?user_id="+tc.userID, nil)

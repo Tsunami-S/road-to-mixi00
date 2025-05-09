@@ -9,40 +9,11 @@ import (
 	"testing"
 
 	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockValidator struct {
-	userExists bool
-	err        error
-}
-
-func (m *mockValidator) UserExists(id string) (bool, error) {
-	return m.userExists, m.err
-}
-
-type mockBlockRepo struct {
-	isBlockedErr     error
-	isBlockedResult  bool
-	deleteFriendErr  error
-	rejectRequestErr error
-	blockErr         error
-}
-
-func (m *mockBlockRepo) IsBlocked(u1, u2 string) (bool, error) {
-	return m.isBlockedResult, m.isBlockedErr
-}
-func (m *mockBlockRepo) DeleteFriendLink(u1, u2 string) error {
-	return m.deleteFriendErr
-}
-func (m *mockBlockRepo) RejectRequests(u1, u2 string) error {
-	return m.rejectRequestErr
-}
-func (m *mockBlockRepo) Block(u1, u2 string) error {
-	return m.blockErr
-}
 
 func TestAddBlockList(t *testing.T) {
 	e := echo.New()
@@ -52,7 +23,7 @@ func TestAddBlockList(t *testing.T) {
 		input          model.BlockRequest
 		validatorErr   error
 		validatorExist bool
-		repo           *mockBlockRepo
+		repo           *mock.BlockRepositoryMock
 		wantCode       int
 		wantContains   string
 	}{
@@ -60,7 +31,7 @@ func TestAddBlockList(t *testing.T) {
 			name:           "正常系",
 			input:          model.BlockRequest{User1ID: "user01", User2ID: "user02"},
 			validatorExist: true,
-			repo:           &mockBlockRepo{},
+			repo:           &mock.BlockRepositoryMock{},
 			wantCode:       http.StatusOK,
 			wantContains:   "user blocked",
 		},
@@ -100,7 +71,7 @@ func TestAddBlockList(t *testing.T) {
 			name:           "異常系: 既にブロック済み",
 			input:          model.BlockRequest{User1ID: "x", User2ID: "y"},
 			validatorExist: true,
-			repo:           &mockBlockRepo{isBlockedResult: true},
+			repo:           &mock.BlockRepositoryMock{IsBlockedResult: true},
 			wantCode:       http.StatusBadRequest,
 			wantContains:   "already blocked",
 		},
@@ -108,7 +79,7 @@ func TestAddBlockList(t *testing.T) {
 			name:           "異常系: friendship 削除失敗",
 			input:          model.BlockRequest{User1ID: "x", User2ID: "y"},
 			validatorExist: true,
-			repo:           &mockBlockRepo{deleteFriendErr: errors.New("delete error")},
+			repo:           &mock.BlockRepositoryMock{DeleteFriendErr: errors.New("delete error")},
 			wantCode:       http.StatusInternalServerError,
 			wantContains:   "failed to delete friendship",
 		},
@@ -116,7 +87,7 @@ func TestAddBlockList(t *testing.T) {
 			name:           "異常系: friend request 拒否失敗",
 			input:          model.BlockRequest{User1ID: "x", User2ID: "y"},
 			validatorExist: true,
-			repo:           &mockBlockRepo{rejectRequestErr: errors.New("reject error")},
+			repo:           &mock.BlockRepositoryMock{RejectRequestErr: errors.New("reject error")},
 			wantCode:       http.StatusInternalServerError,
 			wantContains:   "failed to reject friend request",
 		},
@@ -124,7 +95,7 @@ func TestAddBlockList(t *testing.T) {
 			name:           "異常系: block 失敗",
 			input:          model.BlockRequest{User1ID: "x", User2ID: "y"},
 			validatorExist: true,
-			repo:           &mockBlockRepo{blockErr: errors.New("block error")},
+			repo:           &mock.BlockRepositoryMock{BlockErr: errors.New("block error")},
 			wantCode:       http.StatusInternalServerError,
 			wantContains:   "failed to block user",
 		},
@@ -138,13 +109,13 @@ func TestAddBlockList(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			validator := &mockValidator{
-				userExists: tc.validatorExist,
-				err:        tc.validatorErr,
+			validator := &mock.UserValidatorMock{
+				UserExistsResult: tc.validatorExist,
+				Err:              tc.validatorErr,
 			}
 			repo := tc.repo
 			if repo == nil {
-				repo = &mockBlockRepo{}
+				repo = &mock.BlockRepositoryMock{}
 			}
 			h := NewBlockHandler(validator, repo)
 			err := h.AddBlockList(c)

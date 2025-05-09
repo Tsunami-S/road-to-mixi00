@@ -8,29 +8,11 @@ import (
 	"testing"
 
 	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockPaginationValidator struct {
-	limit int
-	page  int
-	err   error
-}
-
-func (m *mockPaginationValidator) ParseAndValidatePagination(c echo.Context) (int, int, error) {
-	return m.limit, m.page, m.err
-}
-
-type mockFriendOfFriendPagingRepo struct {
-	result []model.Friend
-	err    error
-}
-
-func (m *mockFriendOfFriendPagingRepo) GetFriendOfFriendByIDWithPaging(id string, limit, offset int) ([]model.Friend, error) {
-	return m.result, m.err
-}
 
 func TestFriendOfFriendPagingHandler(t *testing.T) {
 	e := echo.New()
@@ -119,9 +101,9 @@ func TestFriendOfFriendPagingHandler(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			v := &mockValidator{exists: tc.valExists, err: tc.valErr}
-			p := &mockPaginationValidator{limit: tc.limit, page: tc.page, err: tc.pageErr}
-			r := &mockFriendOfFriendPagingRepo{result: tc.repoResult, err: tc.repoErr}
+			v := &mock.UserValidatorMock{UserExistsResult: tc.valExists, Err: tc.valErr}
+			p := &mock.PaginationValidatorMock{Limit: tc.limit, Page: tc.page, Err: tc.pageErr}
+			r := &mock.FriendOfFriendPagingRepositoryMock{Result: tc.repoResult, Err: tc.repoErr}
 
 			h := NewFriendOfFriendPagingHandler(v, p, r)
 

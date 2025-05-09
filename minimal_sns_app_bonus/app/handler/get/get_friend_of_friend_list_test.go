@@ -8,19 +8,11 @@ import (
 	"testing"
 
 	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockFriendOfFriendRepo struct {
-	result []model.Friend
-	err    error
-}
-
-func (m *mockFriendOfFriendRepo) GetFriendOfFriend(id string) ([]model.Friend, error) {
-	return m.result, m.err
-}
 
 func TestFriendOfFriendHandler(t *testing.T) {
 	e := echo.New()
@@ -89,8 +81,14 @@ func TestFriendOfFriendHandler(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			v := &mockValidator{exists: tc.mockExists, err: tc.mockValErr}
-			r := &mockFriendOfFriendRepo{result: tc.mockResult, err: tc.mockRepoErr}
+			v := &mock.UserValidatorMock{
+				UserExistsResult: tc.mockExists,
+				Err:              tc.mockValErr,
+			}
+			r := &mock.FriendOfFriendRepositoryMock{
+				Result: tc.mockResult,
+				Err:    tc.mockRepoErr,
+			}
 			h := NewFriendOfFriendHandler(v, r)
 
 			req := httptest.NewRequest(http.MethodGet, "/?id="+tc.userID, nil)

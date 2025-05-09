@@ -6,11 +6,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/db"
 	handler_create "minimal_sns_app/handler/create"
 	"minimal_sns_app/handler/validate"
 	repo_create "minimal_sns_app/repository/create"
+
+	"github.com/labstack/echo/v4"
 )
 
 func setupTestDB_Block(t *testing.T) {

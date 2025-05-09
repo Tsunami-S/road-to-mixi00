@@ -1,0 +1,34 @@
+curl -X GET 'http://localhost:1323/get_friend_list?id=1'
+curl -X GET 'http://localhost:1323/get_friend_list?id=id1'
+
+curl -X GET 'http://localhost:1323/get_friend_of_friend_list?id=1'
+curl -X GET 'http://localhost:1323/get_friend_of_friend_list?id=id1'
+
+curl -X GET 'http://localhost:1323/get_friend_of_friend_list_paging?id=1&limit=2&page=1'
+curl -X GET 'http://localhost:1323/get_friend_of_friend_list_paging?id=id1&limit=2&page=1'
+
+curl -X GET 'http://localhost:1323/get_all_users'
+
+curl -X GET 'http://localhost:1323/get_all_blocks'
+
+curl -X GET 'http://localhost:1323/get_all_friends'
+
+curl -X GET 'http://localhost:1323/get_all_requests'
+
+curl -X GET 'http://localhost:1323/pending_requests?user_id=id1'
+
+curl -X POST 'http://localhost:1323/add_new_user' \
+  -H "Content-Type: application/json" \
+  -d '{"id":"new_id1", "name":"new_user1"}'
+
+curl -X POST 'http://localhost:1323/block_user' \
+  -H "Content-Type: application/json" \
+  -d '{"user1_id":"new_id1", "user2_id":"new_id2"}'
+
+curl -X POST 'http://localhost:1323/request_friend' \
+  -H "Content-Type: application/json" \
+  -d '{"user1_id": "new_id1", "user2_id": "new_id3"}'
+
+curl -X POST 'http://localhost:1323/respond_friend_request' \
+  -H "Content-Type: application/json" \
+  -d '{"user1_id":"new_id1", "user2_id":"new_id3", "action":"accepted"}'

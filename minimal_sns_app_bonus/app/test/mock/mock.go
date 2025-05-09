@@ -6,161 +6,171 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// Validator モック
-type Validator struct {
-	Exists bool
-	Err    error
+// Validator
+
+type UserValidatorMock struct {
+	UserExistsResult bool
+	Err              error
 }
 
-func (m *Validator) UserExists(id string) (bool, error) {
-	return m.Exists, m.Err
+func (m *UserValidatorMock) UserExists(id string) (bool, error) {
+	return m.UserExistsResult, m.Err
 }
 
-// PaginationValidator モック
-type PaginationValidator struct {
-	Limit, Page int
-	Err         error
+type ValidatorMock struct {
+	Err error
 }
 
-func (m *PaginationValidator) ParseAndValidatePagination(c echo.Context) (int, int, error) {
-	return m.Limit, m.Page, m.Err
+func (v *ValidatorMock) ValidateID(id string) error {
+	return v.Err
 }
 
-// FriendRepo モック
-type FriendRepo struct {
-	Result []model.Friend
-	Err    error
+// UserRepository
+
+type UserRepositoryMock struct {
+	Exists    bool
+	ExistsErr error
+	CreateErr error
 }
 
-func (m *FriendRepo) GetFriends(id string) ([]model.Friend, error) {
-	return m.Result, m.Err
+func (m *UserRepositoryMock) IsUserIDExists(id string) (bool, error) {
+	return m.Exists, m.ExistsErr
 }
 
-// FriendOfFriendRepo モック
-type FriendOfFriendRepo struct {
-	Result []model.Friend
-	Err    error
+func (m *UserRepositoryMock) CreateUser(id, name string) error {
+	return m.CreateErr
 }
 
-func (m *FriendOfFriendRepo) GetFriendOfFriend(id string) ([]model.Friend, error) {
-	return m.Result, m.Err
+// BlockRepository
+
+type BlockRepositoryMock struct {
+	IsBlockedResult  bool
+	IsBlockedErr     error
+	DeleteFriendErr  error
+	RejectRequestErr error
+	BlockErr         error
 }
 
-// FriendOfFriendPagingRepo モック
-type FriendOfFriendPagingRepo struct {
-	Result []model.Friend
-	Err    error
+func (m *BlockRepositoryMock) IsBlocked(u1, u2 string) (bool, error) {
+	return m.IsBlockedResult, m.IsBlockedErr
 }
 
-func (m *FriendOfFriendPagingRepo) GetFriendOfFriendByIDWithPaging(id string, limit, offset int) ([]model.Friend, error) {
-	return m.Result, m.Err
+func (m *BlockRepositoryMock) DeleteFriendLink(u1, u2 string) error {
+	return m.DeleteFriendErr
 }
 
-// FriendRequestRepo モック
-type FriendRequestRepo struct {
-	Requests              []model.FriendRequest
-	Err                   error
-	HasRequestedResult    bool
-	HasRequestedErr       error
-	RequestResult         error
+func (m *BlockRepositoryMock) RejectRequests(u1, u2 string) error {
+	return m.RejectRequestErr
+}
+
+func (m *BlockRepositoryMock) Block(u1, u2 string) error {
+	return m.BlockErr
+}
+
+// FriendRequestRepository
+
+type FriendRequestRepositoryMock struct {
 	IsBlockedResult       bool
 	IsBlockedErr          error
-	IsAlreadyFriendsValue bool
-	IsAlreadyFriendsErr   error
-	HasReverseRequest     bool
-	HasReverseRequestErr  error
+	IsFriendResult        bool
+	IsFriendErr           error
+	HasReverseResult      bool
+	HasReverseErr         error
+	HasRequestedResult    bool
+	HasRequestedErr       error
+	RequestErr            error
+	PendingRequestsResult []model.FriendRequest
+	PendingRequestsErr    error
 }
 
-func (m *FriendRequestRepo) GetPendingRequests(userID string) ([]model.FriendRequest, error) {
-	return m.Requests, m.Err
+func (m *FriendRequestRepositoryMock) IsBlockedEachOther(u1, u2 string) (bool, error) {
+	return m.IsBlockedResult, m.IsBlockedErr
 }
 
-func (m *FriendRequestRepo) HasAlreadyRequested(user1, user2 string) (bool, error) {
+func (m *FriendRequestRepositoryMock) IsAlreadyFriends(u1, u2 string) (bool, error) {
+	return m.IsFriendResult, m.IsFriendErr
+}
+
+func (m *FriendRequestRepositoryMock) HasPendingRequest(u1, u2 string) (bool, error) {
+	return m.HasReverseResult, m.HasReverseErr
+}
+
+func (m *FriendRequestRepositoryMock) HasAlreadyRequested(u1, u2 string) (bool, error) {
 	return m.HasRequestedResult, m.HasRequestedErr
 }
 
-func (m *FriendRequestRepo) Request(user1, user2 string) error {
-	return m.RequestResult
+func (m *FriendRequestRepositoryMock) Request(u1, u2 string) error {
+	return m.RequestErr
 }
 
-func (m *FriendRequestRepo) IsBlockedEachOther(user1, user2 string) (bool, error) {
-	return m.IsBlockedResult, m.IsBlockedErr
+func (m *FriendRequestRepositoryMock) GetPendingRequests(userID string) ([]model.FriendRequest, error) {
+	return m.PendingRequestsResult, m.PendingRequestsErr
 }
 
-func (m *FriendRequestRepo) IsAlreadyFriends(user1, user2 string) (bool, error) {
-	return m.IsAlreadyFriendsValue, m.IsAlreadyFriendsErr
+// RespondFriend
+
+type RespondRepositoryMock struct {
+	FindRequestResult *model.FriendRequest
+	FindRequestErr    error
+	UpdateRequestErr  error
+	CreateFriendErr   error
+	RespondErr        error
 }
 
-func (m *FriendRequestRepo) HasPendingRequest(user1, user2 string) (bool, error) {
-	return m.HasReverseRequest, m.HasReverseRequestErr
-}
-
-func (m *FriendRequestRepo) FindRequest(user1, user2 string) (*model.FriendRequest, error) {
-	if len(m.Requests) == 0 {
-		return nil, m.Err
+func (m *RespondRepositoryMock) FindRequest(user1, user2 string) (*model.FriendRequest, error) {
+	if m.FindRequestResult == nil {
+		return &model.FriendRequest{}, m.FindRequestErr
 	}
-	return &m.Requests[0], m.Err
+	return m.FindRequestResult, m.FindRequestErr
 }
 
-func (m *FriendRequestRepo) UpdateRequest(req *model.FriendRequest, status string) error {
-	return m.Err
+func (m *RespondRepositoryMock) UpdateRequest(req *model.FriendRequest, action string) error {
+	return m.UpdateRequestErr
 }
 
-func (m *FriendRequestRepo) FriendLink(user1, user2 string) error {
-	return m.Err
+func (m *RespondRepositoryMock) CreateFriendLink(user1, user2 string) error {
+	return m.CreateFriendErr
 }
 
-// UserRepository モック
-type UserRepository struct {
-	Exists bool
+func (m *RespondRepositoryMock) RespondRequest(fromID, toID, action string) error {
+	return m.RespondErr
+}
+
+// FriendRepository モック
+
+type FriendRepositoryMock struct {
+	Friends []model.Friend
+	Err     error
+}
+
+func (m *FriendRepositoryMock) GetFriends(id string) ([]model.Friend, error) {
+	return m.Friends, m.Err
+}
+
+type FriendOfFriendRepositoryMock struct {
+	Result []model.Friend
 	Err    error
 }
 
-func (m *UserRepository) IsUserIDExists(id string) (bool, error) {
-	return m.Exists, m.Err
+func (m *FriendOfFriendRepositoryMock) GetFriendOfFriend(id string) ([]model.Friend, error) {
+	return m.Result, m.Err
 }
 
-func (m *UserRepository) CreateUser(id, name string) error {
-	return m.Err
+type FriendOfFriendPagingRepositoryMock struct {
+	Result []model.Friend
+	Err    error
 }
 
-// BlockRepository モック
-type BlockRepository struct {
-	IsBlockedResult bool
-	IsBlockedErr    error
-	OpErr           error
+func (m *FriendOfFriendPagingRepositoryMock) GetFriendOfFriendByIDWithPaging(id string, limit, offset int) ([]model.Friend, error) {
+	return m.Result, m.Err
 }
 
-func (m *BlockRepository) IsBlocked(user1, user2 string) (bool, error) {
-	return m.IsBlockedResult, m.IsBlockedErr
+type PaginationValidatorMock struct {
+	Limit int
+	Page  int
+	Err   error
 }
 
-func (m *BlockRepository) DeleteFriendLink(user1, user2 string) error {
-	return m.OpErr
-}
-
-func (m *BlockRepository) RejectRequests(user1, user2 string) error {
-	return m.OpErr
-}
-
-func (m *BlockRepository) Block(user1, user2 string) error {
-	return m.OpErr
-}
-
-type MockRespondRepo struct{}
-
-func (m *MockRespondRepo) FindRequest(user1, user2 string) (*model.FriendRequest, error) {
-	return &model.FriendRequest{}, nil
-}
-
-func (m *MockRespondRepo) UpdateRequest(req *model.FriendRequest, action string) error {
-	return nil
-}
-
-func (m *MockRespondRepo) CreateFriendLink(user1, user2 string) error {
-	return nil
-}
-
-func (m *MockRespondRepo) RespondRequest(fromID, toID, action string) error {
-	return nil
+func (m *PaginationValidatorMock) ParseAndValidatePagination(c echo.Context) (int, int, error) {
+	return m.Limit, m.Page, m.Err
 }

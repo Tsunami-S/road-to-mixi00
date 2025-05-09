@@ -9,24 +9,11 @@ import (
 	"testing"
 
 	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"
 )
-
-type mockUserRepo struct {
-	exists    bool
-	existsErr error
-	createErr error
-}
-
-func (m *mockUserRepo) IsUserIDExists(id string) (bool, error) {
-	return m.exists, m.existsErr
-}
-
-func (m *mockUserRepo) CreateUser(id, name string) error {
-	return m.createErr
-}
 
 func TestAddNewUser(t *testing.T) {
 	e := echo.New()
@@ -34,7 +21,7 @@ func TestAddNewUser(t *testing.T) {
 	tests := []struct {
 		name         string
 		input        model.AddUserRequest
-		repo         *mockUserRepo
+		repo         *mock.UserRepositoryMock
 		wantCode     int
 		wantContains string
 	}{
@@ -44,7 +31,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "user01",
 				Name: "Taro",
 			},
-			repo:         &mockUserRepo{},
+			repo:         &mock.UserRepositoryMock{},
 			wantCode:     http.StatusOK,
 			wantContains: "user added",
 		},
@@ -54,7 +41,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "",
 				Name: "Taro",
 			},
-			repo:         &mockUserRepo{},
+			repo:         &mock.UserRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "id must have",
 		},
@@ -64,7 +51,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "user01",
 				Name: "",
 			},
-			repo:         &mockUserRepo{},
+			repo:         &mock.UserRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "name must have",
 		},
@@ -74,7 +61,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "abcdefghijklmnopqrstuvwxyz",
 				Name: "Taro",
 			},
-			repo:         &mockUserRepo{},
+			repo:         &mock.UserRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "id must have",
 		},
@@ -82,9 +69,9 @@ func TestAddNewUser(t *testing.T) {
 			name: "error: Name too long",
 			input: model.AddUserRequest{
 				ID:   "user01",
-				Name: string(make([]byte, 65)), // 65文字
+				Name: string(make([]byte, 65)),
 			},
-			repo:         &mockUserRepo{},
+			repo:         &mock.UserRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "name must have",
 		},
@@ -94,7 +81,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "user01",
 				Name: "Taro",
 			},
-			repo:         &mockUserRepo{exists: true},
+			repo:         &mock.UserRepositoryMock{Exists: true},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "already exists",
 		},
@@ -104,7 +91,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "user01",
 				Name: "Taro",
 			},
-			repo:         &mockUserRepo{existsErr: errors.New("db error")},
+			repo:         &mock.UserRepositoryMock{ExistsErr: errors.New("db error")},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "db error",
 		},
@@ -114,7 +101,7 @@ func TestAddNewUser(t *testing.T) {
 				ID:   "user01",
 				Name: "Taro",
 			},
-			repo:         &mockUserRepo{createErr: errors.New("insert failed")},
+			repo:         &mock.UserRepositoryMock{CreateErr: errors.New("insert failed")},
 			wantCode:     http.StatusInternalServerError,
 			wantContains: "failed to create",
 		},

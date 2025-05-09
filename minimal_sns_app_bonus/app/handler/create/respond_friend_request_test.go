@@ -1,4 +1,4 @@
-package create_test
+package create
 
 import (
 	"bytes"
@@ -7,7 +7,6 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	"minimal_sns_app/handler/create"
 	"minimal_sns_app/model"
 	"minimal_sns_app/test/mock"
 
@@ -21,8 +20,8 @@ func TestRespondRequest(t *testing.T) {
 	tests := []struct {
 		name         string
 		input        model.RespondRequestInput
-		validator    *mock.Validator
-		repo         *mock.MockRespondRepo
+		validator    *mock.UserValidatorMock
+		repo         *mock.RespondRepositoryMock
 		wantCode     int
 		wantContains string
 	}{
@@ -31,8 +30,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user02", Action: "accepted",
 			},
-			validator:    &mock.Validator{Exists: true},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: true},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusOK,
 			wantContains: "request accepted",
 		},
@@ -41,8 +40,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user02", Action: "rejected",
 			},
-			validator:    &mock.Validator{Exists: true},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: true},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusOK,
 			wantContains: "request rejected",
 		},
@@ -51,8 +50,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "", User2ID: "user02", Action: "accepted",
 			},
-			validator:    &mock.Validator{Exists: true},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: true},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "invalid user IDs",
 		},
@@ -61,8 +60,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user02", Action: "maybe",
 			},
-			validator:    &mock.Validator{Exists: true},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: true},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "invalid action",
 		},
@@ -71,8 +70,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "user01", Action: "accepted",
 			},
-			validator:    &mock.Validator{Exists: true},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: true},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "invalid user IDs",
 		},
@@ -81,8 +80,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "notfound", User2ID: "user02", Action: "accepted",
 			},
-			validator:    &mock.Validator{Exists: false},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: false},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "user ID not found",
 		},
@@ -91,8 +90,8 @@ func TestRespondRequest(t *testing.T) {
 			input: model.RespondRequestInput{
 				User1ID: "user01", User2ID: "none", Action: "accepted",
 			},
-			validator:    &mock.Validator{Exists: false},
-			repo:         &mock.MockRespondRepo{},
+			validator:    &mock.UserValidatorMock{UserExistsResult: false},
+			repo:         &mock.RespondRepositoryMock{},
 			wantCode:     http.StatusBadRequest,
 			wantContains: "user ID not found",
 		},
@@ -106,7 +105,7 @@ func TestRespondRequest(t *testing.T) {
 			rec := httptest.NewRecorder()
 			c := e.NewContext(req, rec)
 
-			handler := create.NewFriendRespondHandler(tc.validator, tc.repo)
+			handler := NewFriendRespondHandler(tc.validator, tc.repo)
 			err := handler.RespondRequest(c)
 
 			assert.NoError(t, err)
