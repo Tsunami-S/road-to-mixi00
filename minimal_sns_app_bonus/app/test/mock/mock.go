@@ -1,8 +1,9 @@
 package mock
 
 import (
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/model"
+
+	"github.com/labstack/echo/v4"
 )
 
 // Validator モック

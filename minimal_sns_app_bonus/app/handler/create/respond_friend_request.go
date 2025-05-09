@@ -3,9 +3,10 @@ package create
 import (
 	"net/http"
 
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/interfaces"
 	"minimal_sns_app/model"
+
+	"github.com/labstack/echo/v4"
 )
 
 type FriendRespondHandler struct {

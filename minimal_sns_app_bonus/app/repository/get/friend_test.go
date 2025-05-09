@@ -3,8 +3,9 @@ package get
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"minimal_sns_app/db"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func setupTestDB_FriendRepo(t *testing.T) {

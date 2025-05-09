@@ -4,8 +4,9 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/labstack/echo/v4"
 	"minimal_sns_app/interfaces"
+
+	"github.com/labstack/echo/v4"
 )
 
 type FriendHandler struct {

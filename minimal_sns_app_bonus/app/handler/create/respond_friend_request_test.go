@@ -3,12 +3,13 @@ package create_test
 import (
 	"bytes"
 	"encoding/json"
-	"minimal_sns_app/handler/create"
-	"minimal_sns_app/model"
-	"minimal_sns_app/test/mock"
 	"net/http"
 	"net/http/httptest"
 	"testing"
+
+	"minimal_sns_app/handler/create"
+	"minimal_sns_app/model"
+	"minimal_sns_app/test/mock"
 
 	"github.com/labstack/echo/v4"
 	"github.com/stretchr/testify/assert"

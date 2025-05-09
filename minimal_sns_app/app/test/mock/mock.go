@@ -6,7 +6,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-// UserValidator mock
 type UserValidatorMock struct {
 	Exist bool
 	Err   error
@@ -16,7 +15,6 @@ func (m *UserValidatorMock) UserExists(id int) (bool, error) {
 	return m.Exist, m.Err
 }
 
-// FriendRepository mock
 type FriendRepoMock struct {
 	Result []model.Friend
 	Err    error

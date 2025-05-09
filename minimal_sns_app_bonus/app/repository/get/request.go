@@ -2,8 +2,8 @@ package get
 
 import (
 	"errors"
-
 	"gorm.io/gorm"
+
 	"minimal_sns_app/db"
 	"minimal_sns_app/model"
 )
